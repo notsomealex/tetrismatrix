@@ -1,10 +1,12 @@
 #pragma once
-
 #ifndef GAME_H
 #define GAME_H
-#include "match.h"
 
-using namespace pimoroni;
+#include "types.h"
+#include "libs.h"
+
+
+class Match;
 
 
 ///////////////////////////////////////////////////////
@@ -51,12 +53,6 @@ namespace tetrismatrix
     extern Hub75 hub75;
     extern PicoGraphics_PenRGB888 graphics;
 
-
-    // Callback for the dma interrupt (required)
-    static void __isr dma_complete() 
-    {
-        hub75.dma_complete();
-    }
     
     void initGame();
     void updateGame();
@@ -66,5 +62,11 @@ namespace tetrismatrix
     void playerInput();
 
 };
+
+    // Callback for the dma interrupt (required)
+    static void __isr dma_complete() 
+    {
+        tetrismatrix::hub75.dma_complete();
+    }
 
 #endif

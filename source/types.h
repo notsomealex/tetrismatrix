@@ -2,6 +2,8 @@
 #ifndef TYPES_H
 #define TYPES_H
 
+#include "libs.h"
+
 inline uint32_t rgb_to_int32(int r, int g, int b)
 {
     return (r << 16) | (g << 8) | (b);

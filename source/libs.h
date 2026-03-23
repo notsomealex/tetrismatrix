@@ -16,8 +16,10 @@
 #include "../utilities/hub75/hub75.hpp"
 #include <queue>
 #include <vector>
+#include <unordered_map>
 #include <time.h>
 #include <stdlib.h>
+#include <cstdint>
 using namespace pimoroni;
 
 #endif
