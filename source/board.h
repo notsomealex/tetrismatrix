@@ -1,5 +1,7 @@
 #pragma once
 #include "libs.h"
+#include "game.h"
+using namespace tetrismatrix;
 
 #define BOARD_DEFAULT_WIDTH 10
 #define BOARD_DEFAULT_HEIGHT 20
@@ -12,7 +14,7 @@ public:
 
     int board_width = BOARD_DEFAULT_WIDTH;
     int board_height = BOARD_DEFAULT_HEIGHT;
-    int board_pos_x = 10;
+    int board_pos_x = 0;
     int board_pos_y = 0;
     int cleared_lines = 0;
 
@@ -28,4 +30,5 @@ public:
     void resetBoard();
 
     Board();
+    Board(int width, int height, int pos_x, int pos_y);
 };

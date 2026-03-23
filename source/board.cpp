@@ -12,17 +12,17 @@ void Board::initBoard()
         }
     }
 
-   
-    
-   
 }
 
 void Board::printBoard()
 {
+
     for (int i = 0; i < board_height; i++)
     {
         for (int j = 0; j < board_width; j++)
         {
+            const PIECES current_block = (PIECES)board_matrix[i][j];
+            hub75.set_pixel(board_pos_x + j, board_pos_y + i, piece_colors.at(current_block).r, piece_colors.at(current_block).g, piece_colors.at(current_block).b);
         }
     }
 
@@ -103,6 +103,11 @@ void Board::resetBoard()
 
 
 Board::Board()
+{
+    initBoard();
+}
+
+Board::Board(int width, int height, int pos_x, int pos_y) : board_width(width), board_height(height), board_pos_x(board_pos_x), board_pos_y(board_pos_y)
 {
     initBoard();
 }

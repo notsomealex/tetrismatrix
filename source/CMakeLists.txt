@@ -1,4 +1,11 @@
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+
+# lik all source files.
 add_executable(tetrismatrix main.cpp board.cpp game.cpp match.cpp piece.cpp)
+
 
 target_include_directories(tetrismatrix PRIVATE
         ${CMAKE_CURRENT_LIST_DIR}
@@ -8,6 +15,7 @@ target_include_directories(tetrismatrix PRIVATE
 # Generate PIO header
 pico_generate_pio_header(tetrismatrix ${CMAKE_CURRENT_LIST_DIR}/../blink.pio)
 
+# link all libraries.
 target_link_libraries(tetrismatrix
         pico_stdlib
         hardware_spi

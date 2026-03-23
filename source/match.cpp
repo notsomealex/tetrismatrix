@@ -19,6 +19,7 @@ void Match::endMatch()
 void Match::updateMatch()
 {
     board->updateBoard();
+    board->printBoard();
     
     if(piece->just_solidified)
     {

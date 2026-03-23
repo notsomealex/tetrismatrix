@@ -1,12 +1,13 @@
 #include "game.h"
 
+bool tetrismatrix::debug = true;
+Match *tetrismatrix::current_match = nullptr;
+int tetrismatrix::frames = 0;
 
-int Game::frames = 0;
+    Hub75 tetrismatrix::hub75(64, 32, nullptr, PANEL_GENERIC, false);
+    PicoGraphics_PenRGB888 tetrismatrix::graphics(hub75.width, hub75.height, nullptr);
 
-    Hub75 Game::hub75(64, 32, nullptr, PANEL_GENERIC, false);
-    PicoGraphics_PenRGB888 Game::graphics(hub75.width, hub75.height, nullptr);
-
-void Game::initGame()
+void tetrismatrix::initGame()
 {
 
     stdio_init_all();
@@ -16,8 +17,9 @@ void Game::initGame()
     hub75.start(dma_complete);
     printf("hub75 started\n");
 
-    Pen BG = graphics.create_pen(0, 0, 0);
-    Pen WHITE = graphics.create_pen(200, 200, 200);
+
+
+     // TODO: show menu and stuff.
 
     if(current_match == nullptr)
         current_match = new Match();
@@ -25,7 +27,7 @@ void Game::initGame()
 }
 
 
-void Game::endMatch()
+void tetrismatrix::endMatch()
 {
     if (current_match != nullptr)
     {
@@ -34,27 +36,27 @@ void Game::endMatch()
     }
 }
 
-void Game::newMatch()
+void tetrismatrix::newMatch()
 {
     if (current_match == nullptr)
         current_match = new Match();
 }
 
-void Game::playerInput()
+void tetrismatrix::playerInput()
 {
 }
 
-void Game::updateGame()
+void tetrismatrix::updateGame()
 {
+    printf("updating game!!\n\n");
+
+    // we clear the screan each frame.
+    hub75.clear();
+
     if(current_match != nullptr)
         current_match->updateMatch();
 
-        frames++;
-}
-
-Game::Game()
-{
-    
+    frames++;
 }
 
 

@@ -22,6 +22,7 @@ void Piece::movePiece()
     int temp_pos_x = pos_x;
     int temp_pos_y = pos_y;
 
+    // TODO: figure out wtf to do with input.
     /*
     if(keys_down & KEY_L || keys_down & KEY_R)
         swapPiece();
@@ -114,7 +115,6 @@ void Piece::movePiece()
 void Piece::hardDrop()
 {
   
-
         while (!(checkCollision() & COLLISION_DIRECTION::DOWN))
         {
             pos_y++;
@@ -133,7 +133,8 @@ void Piece::printPiece(std::vector<std::vector<int>> piece_matrix, int pos_x, in
     {
         for (int j = 0; j < (int)piece_matrix[0].size(); j++)
         {
-            
+            const PIECES current_block = (PIECES)piece_matrix[i][j];
+            hub75.set_pixel(board->board_pos_x + j, board->board_pos_y + i, piece_colors.at(current_block).r, piece_colors.at(current_block).g, piece_colors.at(current_block).b);
         }
     }
 }
@@ -167,7 +168,7 @@ void Piece::printGhostPiece()
                 // is the upcoming piece.
                 PIECES current_shape = (PIECES)ghost_piece_matrix[i][j];
                 // sets it to the ghost counterpart.
-                ghost_piece_matrix[i][j] = shape + 7;
+                ghost_piece_matrix[i][j] = GHOST;
             }
         }
     }
