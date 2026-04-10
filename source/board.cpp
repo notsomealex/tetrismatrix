@@ -1,4 +1,5 @@
 #include "board.h"
+#include "helpers.h"
 
 void Board::initBoard()
 {
@@ -22,7 +23,11 @@ void Board::printBoard()
         for (int j = 0; j < board_width; j++)
         {
             const PIECES current_block = (PIECES)board_matrix[i][j];
-            hub75.set_pixel(board_pos_x + j, board_pos_y + i, piece_colors.at(current_block).r, piece_colors.at(current_block).g, piece_colors.at(current_block).b);
+            int x = vertical ? board_pos_y + (i * game_scale) : board_pos_x + (j * game_scale);
+            int y = vertical ? board_pos_x + (j * game_scale) : board_pos_y + (i * game_scale);
+            
+            drawSquare(hub75, game_scale, x, y, piece_colors.at(current_block).r, piece_colors.at(current_block).g, piece_colors.at(current_block).b);
+            //hub75.set_pixel(x, y, piece_colors.at(current_block).r, piece_colors.at(current_block).g, piece_colors.at(current_block).b);
         }
     }
 
@@ -107,7 +112,7 @@ Board::Board()
     initBoard();
 }
 
-Board::Board(int width, int height, int pos_x, int pos_y) : board_width(width), board_height(height), board_pos_x(board_pos_x), board_pos_y(board_pos_y)
+Board::Board(int width, int height, int pos_x, int pos_y) : board_width(width), board_height(height), board_pos_x(pos_x), board_pos_y(pos_y)
 {
     initBoard();
 }

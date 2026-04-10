@@ -4,7 +4,7 @@
 void Match::initMatch()
 {
     srand(time(0));
-    board = new Board();
+    board = new Board(16, 32, 0, 0);
     piece = new Piece(board, upcoming_pieces);
     setUpcomingPieces();
     
@@ -19,7 +19,6 @@ void Match::endMatch()
 void Match::updateMatch()
 {
     board->updateBoard();
-    board->printBoard();
     
     if(piece->just_solidified)
     {

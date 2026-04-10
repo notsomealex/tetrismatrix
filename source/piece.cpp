@@ -1,5 +1,6 @@
 #include "piece.h"
-
+#include "input.h"
+#include "helpers.h"
 void Piece::initPiece()
 {
     shape = (PIECES)((rand() % 7) + 1);
@@ -22,8 +23,10 @@ void Piece::movePiece()
     int temp_pos_x = pos_x;
     int temp_pos_y = pos_y;
 
-    // TODO: figure out wtf to do with input.
-    /*
+    printf("moving piece!!!\n\n");
+    printf("piece pos_x: %i, piece pos_y: %i", this->pos_x, this->pos_y);
+
+
     if(keys_down & KEY_L || keys_down & KEY_R)
         swapPiece();
 
@@ -58,7 +61,7 @@ void Piece::movePiece()
 
     if (frames_moving == 1 || frames_moving > 5)
     {
-        if (keys_held & KEY_LEFT && !(checkCollision() & COLLISION_DIRECTION::LEFT) && (frames_moving % 2 == 0 || frames_moving == 1))
+        if (keys_down & KEY_LEFT && !(checkCollision() & COLLISION_DIRECTION::LEFT) && (frames_moving % 2 == 0 || frames_moving == 1))
         {
             temp_pos_x--;
             if (temp_pos_x >= board->leftTileLimit() && temp_pos_x < board->rightTileLimit())
@@ -67,7 +70,7 @@ void Piece::movePiece()
             }
         }
 
-        if (keys_held & KEY_RIGHT && !(checkCollision() & COLLISION_DIRECTION::RIGHT) && (frames_moving % 2 == 0 || frames_moving == 1))
+        if (keys_down & KEY_RIGHT && !(checkCollision() & COLLISION_DIRECTION::RIGHT) && (frames_moving % 2 == 0 || frames_moving == 1))
         {
             temp_pos_x++;
             if (temp_pos_x >= board->leftTileLimit() && temp_pos_x < board->rightTileLimit())
@@ -76,7 +79,7 @@ void Piece::movePiece()
             }
         }
 
-        if (keys_held & KEY_DOWN && !(checkCollision() & COLLISION_DIRECTION::DOWN) && (frames_moving % 2 == 0 || frames_moving == 1) && (frames % falling_frequency != 0))
+        if (keys_down & KEY_DOWN && !(checkCollision() & COLLISION_DIRECTION::DOWN) && (frames_moving % 2 == 0 || frames_moving == 1) && (frames % falling_frequency != 0))
         {
             temp_pos_y++;
             if (temp_pos_y > board->topTileLimit() && temp_pos_y < board->bottomTileLimit())
@@ -86,7 +89,7 @@ void Piece::movePiece()
         }
     }
 
-    if (keys_held & (KEY_LEFT | KEY_RIGHT | KEY_DOWN))
+    if (keys_down & (KEY_LEFT | KEY_RIGHT | KEY_DOWN))
         frames_moving++;
     else
         frames_moving = 0;
@@ -109,7 +112,6 @@ void Piece::movePiece()
         rotateCCW();
         frames_moving++;
     }
-        */
 }
 
 void Piece::hardDrop()
@@ -134,7 +136,12 @@ void Piece::printPiece(std::vector<std::vector<int>> piece_matrix, int pos_x, in
         for (int j = 0; j < (int)piece_matrix[0].size(); j++)
         {
             const PIECES current_block = (PIECES)piece_matrix[i][j];
-            hub75.set_pixel(board->board_pos_x + j, board->board_pos_y + i, piece_colors.at(current_block).r, piece_colors.at(current_block).g, piece_colors.at(current_block).b);
+            if(current_block == NONE) continue;
+
+            int x = vertical ? (pos_y + board->board_pos_y + i) * game_scale : (pos_x + board->board_pos_x + j) * game_scale;
+            int y = vertical ? (pos_x + board->board_pos_x + j) * game_scale : (pos_y + board->board_pos_y + i) * game_scale;
+            drawSquare(hub75, game_scale, x, y, piece_colors.at(current_block).r, piece_colors.at(current_block).g, piece_colors.at(current_block).b);
+            //hub75.set_pixel(x, y, piece_colors.at(current_block).r, piece_colors.at(current_block).g, piece_colors.at(current_block).b);
         }
     }
 }

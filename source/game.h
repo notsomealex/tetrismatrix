@@ -45,6 +45,7 @@ class Match;
 namespace tetrismatrix
 {
 
+
     extern bool debug;
 
     extern Match *current_match;
@@ -53,13 +54,16 @@ namespace tetrismatrix
     extern Hub75 hub75;
     extern PicoGraphics_PenRGB888 graphics;
 
+    extern bool vertical;
+
+    extern int game_scale;
+
     
     void initGame();
     void updateGame();
     void composeFrameBuffer();
     void newMatch();
     void endMatch();
-    void playerInput();
 
 };
 

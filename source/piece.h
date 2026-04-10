@@ -54,7 +54,7 @@ public:
     int pos_x = 0;
     int pos_y = 0;
     int frames_moving = 0;
-    int falling_frequency = 60;
+    int falling_frequency = 15;
     int frames_colliding_down = 0;
     int frames_since_hit_ground = 0;
 
