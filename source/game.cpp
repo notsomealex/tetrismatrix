@@ -2,6 +2,7 @@
 #include "match.h"
 #include "menu.h"
 #include "language.h"
+#include "helpers.h"
 
 
 
@@ -45,9 +46,10 @@ void tetrismatrix::initGame()
             )
         }
     };
-    int pos_x = vertical ? SCREEN_HEIGHT / 2 : SCREEN_WIDTH / 2;
-    int pos_y = vertical ? SCREEN_HEIGHT / 2 - 3 : SCREEN_HEIGHT / 2 - 5;
-    main_menu = new Menu(main_menu_options, pos_x, pos_y);
+    int pos_x = vertical ? SCREEN_HEIGHT / 2 : SCREEN_WIDTH / 2 - 2;
+    int pos_y = vertical ? SCREEN_HEIGHT / 2 - 3 : SCREEN_HEIGHT / 2 - 3;
+    std::string title = vertical ? "TETRIS MATRIX" : "TETRISMATRIX";
+    main_menu = new Menu(title, main_menu_options, pos_x, pos_y);
 
     //newMatch();
         
@@ -85,9 +87,15 @@ void tetrismatrix::updateGame()
 
     if(main_menu != nullptr)
         main_menu->displayMenu(graphics, hub75);
+
+    static std::array<int, 3> title_rgb_increments = {2, 3, 5};
+    //static std::array<int, 3> arrow_rgb_increments = {4, 6, 10};
+
+    rainbowEffect(main_menu->title_color, title_rgb_increments);
+    //rainbowEffect(main_menu->arrow_color, arrow_rgb_increments);
     frames++;
 
-    printf("frames: %i\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", frames);
+    //printf("frames: %i\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", frames);
 }
 
 

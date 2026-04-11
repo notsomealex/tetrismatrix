@@ -128,7 +128,6 @@ inline void setPixel(Hub75& hub75, int x, int y, int r, int g, int b, bool verti
     if(x >= 0 && x < SCREEN_WIDTH && y >= 0 && y < SCREEN_HEIGHT)
         hub75.set_pixel(x, y, r, g, b);
 }
-// had to do this since for some reason making this an inline function causes UB for some reason :DDDDDDD
 inline void draw4x3Char(Hub75& hub75, uint16_t hex, int x, int y, int r, int g, int b, bool vertical)
 {
     for(int i = 0; i < 4*3; i++)
@@ -182,8 +181,34 @@ inline void drawBitmap(Hub75& hub75, std::vector<std::vector<int>> bitmap, int w
     }
 }
 
+// accepts an array of size 3 that represents a color, and will change it once per call to this function.
+// so that several continuos calls make a rainbow effect:P
+// you must provide the array containing the increments that each of the rgb values will be incremented with.
+inline void rainbowEffect(std::array<uint8_t, 3>& rgb, std::array<int, 3>& increments)
+{
+    int new_rgb[3] = {rgb[0], rgb[1], rgb[2]};
+    new_rgb[0] += increments[0];
+    new_rgb[1] += increments[1];
+    new_rgb[2] += increments[2];
 
-// same
+    for(int i = 0; i < 3; i++)
+    {
+        if(new_rgb[i] >= 255)
+        {
+            new_rgb[i] = 255;
+            increments[i] *= -1;
+        }   
+        else if(new_rgb[i] <= 0)
+        {
+            new_rgb[i] = 0;
+            increments[i] *= -1;
+        }
+        rgb[i] = new_rgb[i];
+    }
+}
+
+
+// had to do this since for some reason making this an inline function causes UB for some reason :DDDDDDD
 #define drawSquare(hub75, size, x, y, r, g, b)\
     for(int i = 0; i < size; i++)\
     {\

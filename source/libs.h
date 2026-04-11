@@ -21,6 +21,8 @@
 #include <stdlib.h>
 #include <cstdint>
 #include <variant>
+#include <sstream>
+#include <algorithm>
 using namespace pimoroni;
 
 #endif

@@ -67,7 +67,6 @@ namespace tetrismatrix
     
     void initGame();
     void updateGame();
-    void composeFrameBuffer();
     void newMatch();
     void endMatch();
 
