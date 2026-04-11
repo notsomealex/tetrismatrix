@@ -71,8 +71,9 @@ public:
     PIECES next_piece;
     PIECES hold_piece = NONE;
     std::vector<std::vector<int>> current_piece_matrix;
+    int scale = 1;
     void printPiece();
-    void printPiece(std::vector<std::vector<int>> piece_matrix, int pos_x, int pos_y);
+    void printPiece(std::vector<std::vector<int>> piece_matrix, int pos_x, int pos_y, int scale);
     uint8_t checkCollision();
     void updatePiece();
     void movePiece();
@@ -85,7 +86,7 @@ public:
     void printGhostPiece();
     void swapPiece();
 
-    Piece(Board *board, std::queue<PIECES> &upcoming_pieces);
+    Piece(Board *board, std::queue<PIECES> &upcoming_pieces, int scale);
 };
 
 #endif

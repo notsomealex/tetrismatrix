@@ -126,10 +126,10 @@ void Piece::hardDrop()
 void Piece::printPiece()
 {
     printGhostPiece();
-    printPiece(current_piece_matrix, this->pos_x, this->pos_y);
+    printPiece(current_piece_matrix, this->pos_x, this->pos_y, scale);
 }
 
-void Piece::printPiece(std::vector<std::vector<int>> piece_matrix, int pos_x, int pos_y)
+void Piece::printPiece(std::vector<std::vector<int>> piece_matrix, int pos_x, int pos_y, int scale)
 {
     for (int i = 0; i < (int)piece_matrix.size(); i++)
     {
@@ -138,9 +138,9 @@ void Piece::printPiece(std::vector<std::vector<int>> piece_matrix, int pos_x, in
             const PIECES current_block = (PIECES)piece_matrix[i][j];
             if(current_block == NONE) continue;
 
-            int x = vertical ? (pos_y + board->board_pos_y + i) * game_scale : (pos_x + board->board_pos_x + j) * game_scale;
-            int y = vertical ? (pos_x + board->board_pos_x + j) * game_scale : (pos_y + board->board_pos_y + i) * game_scale;
-            drawSquare(hub75, game_scale, x, y, piece_colors.at(current_block).r, piece_colors.at(current_block).g, piece_colors.at(current_block).b);
+            int x = vertical ? (pos_y + board->board_pos_y + i) * scale : (pos_x + board->board_pos_x + j) * scale;
+            int y = vertical ? (pos_x + board->board_pos_x + j) * scale : (pos_y + board->board_pos_y + i) * scale;
+            drawSquare(hub75, scale, x, y, piece_colors.at(current_block).r, piece_colors.at(current_block).g, piece_colors.at(current_block).b);
             //hub75.set_pixel(x, y, piece_colors.at(current_block).r, piece_colors.at(current_block).g, piece_colors.at(current_block).b);
         }
     }
@@ -179,7 +179,7 @@ void Piece::printGhostPiece()
             }
         }
     }
-    printPiece(ghost_piece_matrix, this->pos_x, ghost_piece_pos_y);
+    printPiece(ghost_piece_matrix, this->pos_x, ghost_piece_pos_y, scale);
 
 }
 
@@ -357,8 +357,8 @@ void Piece::swapPiece()
 
 
 // idk why i dont use more this syntax for constructors.
-Piece::Piece(Board *board, std::queue<PIECES> &upcoming_pieces)
-: board(board), upcoming_pieces(upcoming_pieces)
+Piece::Piece(Board *board, std::queue<PIECES> &upcoming_pieces, int scale)
+: board(board), upcoming_pieces(upcoming_pieces), scale(scale)
 {
     initPiece();
 }

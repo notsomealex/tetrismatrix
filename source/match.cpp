@@ -4,10 +4,9 @@
 void Match::initMatch()
 {
     srand(time(0));
-    board = new Board(16, 32, 0, 0);
-    piece = new Piece(board, upcoming_pieces);
+    board = new Board(settings.board_width, settings.board_height, settings.board_pos_x, settings.board_pos_y, settings.game_scale);
+    piece = new Piece(board, upcoming_pieces, settings.game_scale);
     setUpcomingPieces();
-    
 }
 
 void Match::endMatch()

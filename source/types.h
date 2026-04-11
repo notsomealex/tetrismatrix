@@ -4,10 +4,9 @@
 
 #include "libs.h"
 
-inline uint32_t rgb_to_int32(int r, int g, int b)
-{
-    return (r << 16) | (g << 8) | (b);
-}
+#define SCREEN_WIDTH 64
+#define SCREEN_HEIGHT 32
+
 
 enum PIECES
 {

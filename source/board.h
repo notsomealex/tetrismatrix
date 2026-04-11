@@ -17,6 +17,7 @@ public:
     int board_pos_x = 0;
     int board_pos_y = 0;
     int cleared_lines = 0;
+    int scale = 1;
 
     void initBoard();
     void printBoard();
@@ -30,5 +31,5 @@ public:
     void resetBoard();
 
     Board();
-    Board(int width, int height, int pos_x, int pos_y);
+    Board(int width, int height, int pos_x, int pos_y, int scale);
 };

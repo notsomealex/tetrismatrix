@@ -20,6 +20,7 @@
 #include <time.h>
 #include <stdlib.h>
 #include <cstdint>
+#include <variant>
 using namespace pimoroni;
 
 #endif

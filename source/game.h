@@ -7,6 +7,9 @@
 
 
 class Match;
+class Menu;
+
+enum class Language;
 
 
 ///////////////////////////////////////////////////////
@@ -56,7 +59,10 @@ namespace tetrismatrix
 
     extern bool vertical;
 
-    extern int game_scale;
+
+    extern Menu* main_menu;
+
+    extern Language current_language;
 
     
     void initGame();
