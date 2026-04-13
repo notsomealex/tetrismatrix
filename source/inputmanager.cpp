@@ -115,13 +115,15 @@ void InputManager::searchForControllers()
 
 void InputManager::enablePairing()
 {
-    uni_bt_enable_new_connections_safe(true);
+    //uni_bt_enable_new_connections_safe(true);
+    uni_bt_start_scanning_and_autoconnect_safe();
     pairing_enabled = true;
 }
 
 void InputManager::disablePairing()
 {
-    uni_bt_enable_new_connections_safe(false);
+    //uni_bt_enable_new_connections_safe(false);
+    uni_bt_stop_scanning_safe();
     pairing_enabled = false;
 }
 
