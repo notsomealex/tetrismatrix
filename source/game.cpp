@@ -3,6 +3,7 @@
 #include "menu.h"
 #include "language.h"
 #include "helpers.h"
+#include "inputmanager.h"
 
 
 
@@ -11,7 +12,7 @@ Match *tetrismatrix::current_match = nullptr;
 int tetrismatrix::frames = 0;
 bool tetrismatrix::vertical = true;
 Menu* tetrismatrix::main_menu = nullptr;
-Language tetrismatrix::current_language = Language::EN;
+Language tetrismatrix::current_language = Language::ES;
 
 Hub75 tetrismatrix::hub75(SCREEN_WIDTH, SCREEN_HEIGHT, nullptr, PANEL_GENERIC, false);
 PicoGraphics_PenRGB888 tetrismatrix::graphics(hub75.width, hub75.height, nullptr);
@@ -24,6 +25,16 @@ void tetrismatrix::initGame()
 
     hub75.start(dma_complete);
     printf("hub75 started\n");
+
+    if(!InputManager::init())
+    {
+        while(1) 
+        {
+            printf("bluetooth input failed! cannot continue\n\n");
+            sleep_ms(1000);
+        }
+    }
+    printf("bluetooth input started!\n");
 
 
     std::vector<Menu::Option> main_menu_options = 
@@ -76,8 +87,14 @@ void tetrismatrix::updateGame()
 {
     //printf("updating game!!\n\n");
 
+    while(InputManager::controllers_connected == 0)
+    {
+        InputManager::searchForControllers();
+    }
+
     // we clear the screan each frame.
     hub75.clear();
+
 
     if(current_match != nullptr)
     {
@@ -86,18 +103,18 @@ void tetrismatrix::updateGame()
     }
 
     if(main_menu != nullptr)
-        main_menu->displayMenu(graphics, hub75);
+        main_menu->updateMenu(graphics, hub75);
 
     static std::array<int, 3> title_rgb_increments = {2, 3, 5};
     //static std::array<int, 3> arrow_rgb_increments = {4, 6, 10};
 
     rainbowEffect(main_menu->title_color, title_rgb_increments);
     //rainbowEffect(main_menu->arrow_color, arrow_rgb_increments);
+
     frames++;
 
     //printf("frames: %i\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", frames);
 }
-
 
 
 

@@ -11,7 +11,11 @@ enum class Texts
     START,
     OPTIONS,
     SCORES,
-    VOLUME
+    VOLUME,
+    SEARCHING,
+    CONTROLLERS,
+    CONTROLLER,
+    CONNECTED
 };
 using enum Texts;
 
@@ -26,6 +30,10 @@ inline Translations translations = {
             {OPTIONS, "OPTIONS"},
             {SCORES, "SCORES"},
             {VOLUME, "VOLUME"},
+            {SEARCHING, "SEARCHING"},
+            {CONTROLLERS, "CONTROLLERS"},
+            {CONTROLLER, "CONTROLLER"},
+            {CONNECTED, "CONNECTED"}
         }
     },
     {
@@ -35,6 +43,10 @@ inline Translations translations = {
             {OPTIONS, "OPCIONES"},
             {SCORES, "PUNTUACIONES"},
             {VOLUME, "VOLUMEN"},
+            {SEARCHING, "BUSCANDO"},
+            {CONTROLLERS, "CONTROLES"},
+            {CONTROLLER, "CONTROL"},
+            {CONNECTED, "CONECTADO"}
         }
     },
 };

@@ -6,7 +6,7 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set(CMAKE_CXX_STANDARD 20) 
 
 # lik all source files.
-add_executable(tetrismatrix main.cpp board.cpp game.cpp match.cpp piece.cpp input.cpp menu.cpp)
+add_executable(tetrismatrix main.cpp board.cpp game.cpp match.cpp piece.cpp menu.cpp my_platform.c inputmanager.cpp)
 
 
 target_include_directories(tetrismatrix PRIVATE
@@ -20,6 +20,7 @@ pico_generate_pio_header(tetrismatrix ${CMAKE_CURRENT_LIST_DIR}/../blink.pio)
 # link all libraries.
 target_link_libraries(tetrismatrix
         pico_stdlib
+        pico_multicore
         hardware_spi
         hardware_i2c
         hardware_dma
@@ -29,6 +30,7 @@ target_link_libraries(tetrismatrix
         hardware_watchdog
         hardware_clocks
         hub75
+        bluepad32
 )
 
 

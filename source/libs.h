@@ -4,6 +4,9 @@
 #include <stdio.h>
 #include <iostream>
 #include "pico/stdlib.h"
+#include <pico/cyw43_arch.h>
+#include "pico/multicore.h"
+#include <btstack_run_loop.h>
 #include "hardware/spi.h"
 #include "hardware/i2c.h"
 #include "hardware/dma.h"
@@ -23,6 +26,7 @@
 #include <variant>
 #include <sstream>
 #include <algorithm>
+#include <uni.h>
 using namespace pimoroni;
 
 #endif

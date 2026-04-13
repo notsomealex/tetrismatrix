@@ -3,7 +3,7 @@
 #include "piece.h"
 void Match::initMatch()
 {
-    srand(time(0));
+    srand(to_ms_since_boot(get_absolute_time()));
     board = new Board(settings.board_width, settings.board_height, settings.board_pos_x, settings.board_pos_y, settings.game_scale);
     piece = new Piece(board, upcoming_pieces, settings.game_scale);
     setUpcomingPieces();

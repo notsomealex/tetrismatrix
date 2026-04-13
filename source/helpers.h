@@ -142,9 +142,17 @@ inline void draw4x3Char(Hub75& hub75, uint16_t hex, int x, int y, int r, int g, 
         }
     }
 }
-// same
+
+inline void cropTextToFit(std::string& text, int font_width, int pixels_limit)
+{
+    if(text.size() * font_width >= pixels_limit)
+        text.replace((pixels_limit / font_width) - 2, text.size() - (pixels_limit / font_width - 2), ".");
+}
+// TODO: MAYBE add a sliding text instead of just truncating for texts that dont fit.
 inline void draw4x3Text(Hub75& hub75, const std::string& text, int x, int y, int r, int g, int b, bool vertical)
 {
+
+
     if(text.size() != 0)
     {
         for(int i = 0; i < (int)text.size(); i++)

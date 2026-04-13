@@ -1,6 +1,7 @@
 #include "menu.h"
 #include "game.h"
 #include "helpers.h"
+#include "inputmanager.h"
 
 
 int32_t white = rgb_to_int32(255, 255, 255);
@@ -55,9 +56,6 @@ void Menu::displayMenu(PicoGraphics_PenRGB888& graphics, Hub75& hub75)
         //printf("printing option #%i\n\n", i);
 
         std::string text = options[i].name;
-        int limit = tetrismatrix::vertical ? SCREEN_HEIGHT : SCREEN_WIDTH;
-        if(text.size() * 4 >= limit)
-            text.replace((limit / 4) - 2, text.size() - (limit / 4 - 2), ".");
 
         int x = (pos_x);
         int y = (pos_y);
@@ -67,8 +65,14 @@ void Menu::displayMenu(PicoGraphics_PenRGB888& graphics, Hub75& hub75)
             std::swap(x, y);
         }
 
+        std::string drawn_text = text;
+        int limit = tetrismatrix::vertical ? SCREEN_HEIGHT : SCREEN_WIDTH;
+        cropTextToFit(drawn_text, 4, limit);
+
         y += (i * scale * 4);
-        x -= ((text.size() / 2) * 3);
+        x -= ((drawn_text.size() / 2) * 3);
+
+        draw4x3Text(hub75, drawn_text, x, y, 255, 255, 255, tetrismatrix::vertical);
 
         //printf("pos_x: %i pos_y: %i", x, y);
 
@@ -83,8 +87,7 @@ void Menu::displayMenu(PicoGraphics_PenRGB888& graphics, Hub75& hub75)
             //printf("arrow pos_x: %i pos_y %i\n\n\n", x, y);
             drawBitmap(hub75, arrow, arrow.size(), arrow[0].size(), arrow_pos_x, arrow_pos_y, tetrismatrix::vertical);
         }
-        //graphics.text(options[i].name, Point(x, y), 1 , 0.5f, angle);
-        draw4x3Text(hub75, text, x, y, 255, 255, 255, tetrismatrix::vertical);
+
         for(int i = 0; i < arrow[0].size(); i++)
         {
             for(int j = 0; j < arrow.size(); j++)
@@ -97,4 +100,44 @@ void Menu::displayMenu(PicoGraphics_PenRGB888& graphics, Hub75& hub75)
         
     }
 
+}
+
+void Menu::updateMenu(PicoGraphics_PenRGB888& graphics, Hub75& hub75)
+{
+    if(hide_menu) return;
+
+    displayMenu(graphics, hub75);
+    if(InputManager::controllers.empty())
+    {
+        //printf("no controller!\n\n");
+        return;
+    }
+
+    int16_t keys_pressed = InputManager::getKeysPressed(InputManager::controllers[0]);
+
+    if(keys_pressed & KEY_A)
+    {
+        hide_menu = true;
+        executeSelectedOption();
+    }
+
+    if(keys_pressed & KEY_DOWN)
+        selected_index++;
+
+    if(keys_pressed & KEY_UP)
+        selected_index--;
+
+    if(selected_index < 0)
+        selected_index = options.size() - 1;
+    if(selected_index > options.size() - 1)
+        selected_index = 0;
+
+}
+
+void Menu::executeSelectedOption()
+{
+    if(options[selected_index].on_click != NULL)
+        options[selected_index].on_click();
+    else
+        hide_menu = false;
 }

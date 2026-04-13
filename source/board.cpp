@@ -24,7 +24,8 @@ void Board::printBoard()
         {
             const PIECES current_block = (PIECES)board_matrix[i][j];
             int x = vertical ? board_pos_y + (i * scale) : board_pos_x + (j * scale);
-            int y = vertical ? board_pos_x + (j * scale) : board_pos_y + (i * scale);
+            // i dont like that i have to do this hack so that it doesnt show mirrored but mehhhhhhh
+            int y = vertical ? board_pos_x + ((board_width - 1 - j) * scale) : board_pos_y + (i * scale);
             
             drawSquare(hub75, scale, x, y, piece_colors.at(current_block).r, piece_colors.at(current_block).g, piece_colors.at(current_block).b);
             //hub75.set_pixel(x, y, piece_colors.at(current_block).r, piece_colors.at(current_block).g, piece_colors.at(current_block).b);

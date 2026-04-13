@@ -1,5 +1,5 @@
 #include "piece.h"
-#include "input.h"
+#include "inputmanager.h"
 #include "helpers.h"
 void Piece::initPiece()
 {
@@ -26,11 +26,14 @@ void Piece::movePiece()
     printf("moving piece!!!\n\n");
     printf("piece pos_x: %i, piece pos_y: %i", this->pos_x, this->pos_y);
 
+    int16_t keys_pressed = InputManager::getKeysPressed(InputManager::controllers[0]);
+    int16_t keys_held = InputManager::getKeysHeld(InputManager::controllers[0]);
 
-    if(keys_down & KEY_L || keys_down & KEY_R)
+
+    if(keys_held & KEY_L || keys_held & KEY_R)
         swapPiece();
 
-    if (keys_down & KEY_UP)
+    if (keys_pressed & KEY_UP)
     {
         hardDrop();
     }
@@ -61,7 +64,7 @@ void Piece::movePiece()
 
     if (frames_moving == 1 || frames_moving > 5)
     {
-        if (keys_down & KEY_LEFT && !(checkCollision() & COLLISION_DIRECTION::LEFT) && (frames_moving % 2 == 0 || frames_moving == 1))
+        if (keys_held & KEY_LEFT && !(checkCollision() & COLLISION_DIRECTION::LEFT) && (frames_moving % 2 == 0 || frames_moving == 1))
         {
             temp_pos_x--;
             if (temp_pos_x >= board->leftTileLimit() && temp_pos_x < board->rightTileLimit())
@@ -70,7 +73,7 @@ void Piece::movePiece()
             }
         }
 
-        if (keys_down & KEY_RIGHT && !(checkCollision() & COLLISION_DIRECTION::RIGHT) && (frames_moving % 2 == 0 || frames_moving == 1))
+        if (keys_held & KEY_RIGHT && !(checkCollision() & COLLISION_DIRECTION::RIGHT) && (frames_moving % 2 == 0 || frames_moving == 1))
         {
             temp_pos_x++;
             if (temp_pos_x >= board->leftTileLimit() && temp_pos_x < board->rightTileLimit())
@@ -79,7 +82,7 @@ void Piece::movePiece()
             }
         }
 
-        if (keys_down & KEY_DOWN && !(checkCollision() & COLLISION_DIRECTION::DOWN) && (frames_moving % 2 == 0 || frames_moving == 1) && (frames % falling_frequency != 0))
+        if (keys_held & KEY_DOWN && !(checkCollision() & COLLISION_DIRECTION::DOWN) && (frames_moving % 2 == 0 || frames_moving == 1) && (frames % falling_frequency != 0))
         {
             temp_pos_y++;
             if (temp_pos_y > board->topTileLimit() && temp_pos_y < board->bottomTileLimit())
@@ -89,7 +92,7 @@ void Piece::movePiece()
         }
     }
 
-    if (keys_down & (KEY_LEFT | KEY_RIGHT | KEY_DOWN))
+    if (keys_held & (KEY_LEFT | KEY_RIGHT | KEY_DOWN))
         frames_moving++;
     else
         frames_moving = 0;
@@ -104,10 +107,10 @@ void Piece::movePiece()
     else
         just_solidified = false;
 
-    if (keys_down & KEY_B)
+    if (keys_pressed & KEY_B)
         rotateCW();
 
-    if (keys_down & KEY_A)
+    if (keys_pressed & KEY_A)
     {
         rotateCCW();
         frames_moving++;
@@ -139,7 +142,7 @@ void Piece::printPiece(std::vector<std::vector<int>> piece_matrix, int pos_x, in
             if(current_block == NONE) continue;
 
             int x = vertical ? (pos_y + board->board_pos_y + i) * scale : (pos_x + board->board_pos_x + j) * scale;
-            int y = vertical ? (pos_x + board->board_pos_x + j) * scale : (pos_y + board->board_pos_y + i) * scale;
+            int y = vertical ? (board->board_width - 1 - (pos_x + board->board_pos_x + j)) * scale : (pos_y + board->board_pos_y + i) * scale;
             drawSquare(hub75, scale, x, y, piece_colors.at(current_block).r, piece_colors.at(current_block).g, piece_colors.at(current_block).b);
             //hub75.set_pixel(x, y, piece_colors.at(current_block).r, piece_colors.at(current_block).g, piece_colors.at(current_block).b);
         }

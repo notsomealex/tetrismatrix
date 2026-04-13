@@ -18,6 +18,12 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+
+set(BLUEPAD32_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/utilities/bluepad32)
+
+# To use BTstack from Pico SDK do
+set(BTSTACK_ROOT ${PICO_SDK_PATH}/lib/btstack)
+
 if(WIN32)
     set(USERHOME $ENV{USERPROFILE})
 else()
@@ -36,12 +42,27 @@ include(pico_sdk_import.cmake)
 
 project(tetrismatrix C CXX ASM)
 
-set(PICO_CXX_ENABLE_EXCEPTIONS 1)
-set(PICO_CXX_ENABLE_RTTI 1)
 
 pico_sdk_init()
+
+include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/source)
+
+# Needed when using BTstack from our branch
+include_directories(${BTSTACK_ROOT}/3rd-party/bluedroid/encoder/include)
+include_directories(${BTSTACK_ROOT}/3rd-party/bluedroid/decoder/include)
+# Need for certain IDEs, like CLion. Otherwise it won't find btstack
+include_directories(${BTSTACK_ROOT}/src)
+add_subdirectory(${BLUEPAD32_ROOT}/src/components/bluepad32 libbluepad32)
+
 
 include_directories(${CMAKE_SOURCE_DIR}/utilities/hub75)
 add_subdirectory(utilities/hub75/libraries/pico_graphics)
 add_subdirectory(utilities/hub75)
 add_subdirectory(source)
+
+# optimizations to make binary size smaller.
+target_compile_options(tetrismatrix PRIVATE -Os)
+set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
+set(PICO_CXX_ENABLE_EXCEPTIONS 0)
+set(PICO_CXX_ENABLE_RTTI 0)
+set(CMAKE_BUILD_TYPE Release)
