@@ -103,27 +103,27 @@ class Hub75 {
     uint brightness = 6;
 
 
-    // Top half of display - 16 rows on a 32x32 panel
-    unsigned int pin_r0 = 2;
-    unsigned int pin_g0 = 3;
-    unsigned int pin_b0 = 4;
+  // Top half of display - 16 rows on a 32x32 panel
+    unsigned int pin_r0 = 0;
+    unsigned int pin_g0 = 1;
+    unsigned int pin_b0 = 2;
 
     // Bottom half of display - 16 rows on a 64x64 panel
-    unsigned int pin_r1 = 5;
-    unsigned int pin_g1 = 8;
-    unsigned int pin_b1 = 9;
+    unsigned int pin_r1 = 3;
+    unsigned int pin_g1 = 4;
+    unsigned int pin_b1 = 5;
 
     // Address pins, 5 lines = 2^5 = 32 values (max 64x64 display)
-    unsigned int pin_row_a = 10;
-    unsigned int pin_row_b = 16;
-    unsigned int pin_row_c = 18;
-    unsigned int pin_row_d = 20;
-    unsigned int pin_row_e = 22;
+    unsigned int pin_row_a = 6;
+    unsigned int pin_row_b = 7;
+    unsigned int pin_row_c = 8;
+    unsigned int pin_row_d = 9;
+    unsigned int pin_row_e = 10;
 
     // Sundry things
     unsigned int pin_clk = 11;    // Clock
     unsigned int pin_stb = 12;    // Strobe/Latch
-    unsigned int pin_oe = 13;     // Output Enable
+    unsigned int pin_oe = 13;     // Output Enable   // Output Enable
 
     const bool clk_polarity = 1;
     const bool stb_polarity = 1;

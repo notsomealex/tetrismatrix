@@ -34,7 +34,7 @@ void core1_program()
 
 int InputManager::controllers_connected = 0;
 bool InputManager::connecting_controller = false;
-bool InputManager::pairing_enabled = true;
+bool InputManager::pairing_enabled = false;
 bool InputManager::new_controller_found = false;
 std::vector<uni_hid_device_t*> InputManager::devices;
 std::vector<uni_controller_t*> InputManager::controllers;
@@ -67,8 +67,8 @@ void InputManager::searchForControllers()
 {
     uint32_t time = to_ms_since_boot(get_absolute_time());
 
-    //if(!pairing_enabled)
-    //   enablePairing();
+    if(!pairing_enabled)
+       enablePairing();
 
     //printf("pairing enabled: %i", pairing_enabled);
 
@@ -115,15 +115,13 @@ void InputManager::searchForControllers()
 
 void InputManager::enablePairing()
 {
-    //uni_bt_enable_new_connections_safe(true);
-    uni_bt_start_scanning_and_autoconnect_safe();
+    uni_bt_enable_new_connections_safe(false);
     pairing_enabled = true;
 }
 
 void InputManager::disablePairing()
 {
-    //uni_bt_enable_new_connections_safe(false);
-    uni_bt_stop_scanning_safe();
+    uni_bt_enable_new_connections_safe(true);
     pairing_enabled = false;
 }
 

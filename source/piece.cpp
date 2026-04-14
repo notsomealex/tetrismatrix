@@ -23,8 +23,8 @@ void Piece::movePiece()
     int temp_pos_x = pos_x;
     int temp_pos_y = pos_y;
 
-    printf("moving piece!!!\n\n");
-    printf("piece pos_x: %i, piece pos_y: %i", this->pos_x, this->pos_y);
+    //printf("moving piece!!!\n\n");
+    //printf("piece pos_x: %i, piece pos_y: %i", this->pos_x, this->pos_y);
 
     int16_t keys_pressed = InputManager::getKeysPressed(InputManager::controllers[0]);
     int16_t keys_held = InputManager::getKeysHeld(InputManager::controllers[0]);
