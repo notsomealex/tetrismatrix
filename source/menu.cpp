@@ -12,10 +12,14 @@ std::vector<std::vector<int>> arrow =
     {0,0,white,0}
 };
 
-Menu::Option::Option(std::string name, std::function<void()> on_click, OptionValue associated_value) : name(name), on_click(on_click), associated_value(associated_value) {}
+Menu::Option::Option(std::string name, std::function<void()> on_click, OptionValue associated_value, bool visible) : name(name), on_click(on_click), associated_value(associated_value), visible(visible) {}
 
-Menu::Menu(std::vector<Option> options) : options(options) {}
-Menu::Menu(std::string title, std::vector<Option> options, int pos_x, int pos_y) : title(title), options(options), pos_x(pos_x), pos_y(pos_y) {}
+Menu::Menu(std::vector<Option> options) : options(options) 
+{
+    Option back_option("Back", []() {tetrismatrix::menus.pop();},0, false);
+    options.push_back(back_option);
+}
+Menu::Menu(std::string title, std::vector<Option> options, int pos_x, int pos_y, std::function<void()> callback) : title(title), options(options), pos_x(pos_x), pos_y(pos_y), callback(callback) {}
 
 void Menu::displayMenu(PicoGraphics_PenRGB888& graphics, Hub75& hub75)
 {
@@ -53,6 +57,9 @@ void Menu::displayMenu(PicoGraphics_PenRGB888& graphics, Hub75& hub75)
 
     for(int i = 0; i < options.size(); i++)
     {
+        if(!options[i].visible)
+            return;
+
         //printf("printing option #%i\n\n", i);
 
         std::string text = options[i].name;
@@ -78,7 +85,8 @@ void Menu::displayMenu(PicoGraphics_PenRGB888& graphics, Hub75& hub75)
 
         if(i == selected_index)
         {
-            if(tetrismatrix::frames % 20 == 0)
+            int16_t keys_pressed = InputManager::keys_pressed[InputManager::controllers[0]];
+            if(tetrismatrix::frames % 20 == 0 || (keys_pressed & KEY_UP) || (keys_pressed & KEY_DOWN))
             {
                 arrow_pos_x = (arrow_pos_x == x - 5) ? x - 4 : x - 5;
                 drawBitmap(hub75, arrow, arrow.size(), arrow[0].size(), arrow_pos_x, arrow_pos_y, tetrismatrix::vertical);
@@ -112,12 +120,13 @@ void Menu::updateMenu(PicoGraphics_PenRGB888& graphics, Hub75& hub75)
         //printf("no controller!\n\n");
         return;
     }
+    if(callback != NULL)
+        this->callback();
 
-    int16_t keys_pressed = InputManager::getKeysPressed(InputManager::controllers[0]);
+    int16_t keys_pressed = InputManager::keys_pressed[InputManager::controllers[0]];
 
     if(keys_pressed & KEY_A)
     {
-        hide_menu = true;
         executeSelectedOption();
     }
 

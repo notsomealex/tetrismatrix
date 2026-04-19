@@ -27,6 +27,9 @@
 #include <sstream>
 #include <algorithm>
 #include <uni.h>
+#include <stack>
+#include "pico/mem_ops.h"
+#include <optional>
 using namespace pimoroni;
 
 #endif

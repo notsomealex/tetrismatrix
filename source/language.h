@@ -15,7 +15,10 @@ enum class Texts
     SEARCHING,
     CONTROLLERS,
     CONTROLLER,
-    CONNECTED
+    CONNECTED,
+    RESUME,
+    EXIT,
+    PAUSE
 };
 using enum Texts;
 
@@ -33,7 +36,10 @@ inline Translations translations = {
             {SEARCHING, "SEARCHING"},
             {CONTROLLERS, "CONTROLLERS"},
             {CONTROLLER, "CONTROLLER"},
-            {CONNECTED, "CONNECTED"}
+            {CONNECTED, "CONNECTED"},
+            {RESUME, "RESUME"},
+            {EXIT, "EXIT"},
+            {PAUSE, "PAUSE"}
         }
     },
     {
@@ -46,7 +52,10 @@ inline Translations translations = {
             {SEARCHING, "BUSCANDO"},
             {CONTROLLERS, "CONTROLES"},
             {CONTROLLER, "CONTROL"},
-            {CONNECTED, "CONECTADO"}
+            {CONNECTED, "CONECTADO"},
+            {RESUME, "REANUDAR"},
+            {EXIT, "SALIR"},
+            {PAUSE, "PAUSA"}
         }
     },
 };

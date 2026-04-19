@@ -26,8 +26,8 @@ void Piece::movePiece()
     //printf("moving piece!!!\n\n");
     //printf("piece pos_x: %i, piece pos_y: %i", this->pos_x, this->pos_y);
 
-    int16_t keys_pressed = InputManager::getKeysPressed(InputManager::controllers[0]);
-    int16_t keys_held = InputManager::getKeysHeld(InputManager::controllers[0]);
+    int16_t keys_pressed = InputManager::keys_pressed[InputManager::controllers[0]];
+    int16_t keys_held = InputManager::keys_held[InputManager::controllers[0]];
 
 
     if(keys_held & KEY_L || keys_held & KEY_R)

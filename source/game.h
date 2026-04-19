@@ -45,6 +45,7 @@ enum class Language;
 #define UART_TX_PIN 4
 #define UART_RX_PIN 5
 
+
 namespace tetrismatrix
 {
 
@@ -60,9 +61,16 @@ namespace tetrismatrix
     extern bool vertical;
 
 
-    extern Menu* main_menu;
-
     extern Language current_language;
+
+    extern std::stack<Menu*> menus;
+
+    struct Settings
+    {
+        MatchSettings match_settings;
+        // TODO: rest of settings.
+    };
+    extern Settings settings;
 
 
     
@@ -71,6 +79,7 @@ namespace tetrismatrix
     void newMatch();
     void endMatch();
 
+    Menu* createMenu(Menus menu_type);
 };
 
     // Callback for the dma interrupt (required)
@@ -78,5 +87,8 @@ namespace tetrismatrix
     {
         tetrismatrix::hub75.dma_complete();
     }
+
+
+
 
 #endif

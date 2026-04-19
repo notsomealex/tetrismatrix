@@ -38,6 +38,8 @@ bool InputManager::pairing_enabled = false;
 bool InputManager::new_controller_found = false;
 std::vector<uni_hid_device_t*> InputManager::devices;
 std::vector<uni_controller_t*> InputManager::controllers;
+std::unordered_map<uni_controller_t*, int16_t> InputManager::keys_held;
+std::unordered_map<uni_controller_t*, int16_t> InputManager::keys_pressed;
 
 bool InputManager::init()
 {
@@ -115,6 +117,7 @@ void InputManager::searchForControllers()
 
 void InputManager::enablePairing()
 {
+    // FUCKING API WAS BACKWARDS AAAAAAAAAA
     uni_bt_enable_new_connections_safe(false);
     pairing_enabled = true;
 }
@@ -158,6 +161,18 @@ void InputManager::onDeviceDisconnected(uni_hid_device_t* device)
 
 // THESE THREE FUNCTIONS BELOW will return a bitmask corresponding to the input values defined in inputmanager.h, NOT the ones from bluepad32.
 // this so that, for example, the stick input and the dpad is the same and yeah dont judge me
+
+// will scan keys for all controllers.
+void InputManager::scanKeys()
+{
+    for(auto& controller : controllers)
+    {
+        keys_held[controller] = getKeysHeld(controller);
+        keys_pressed[controller] = getKeysPressed(controller);
+    }
+}
+
+// DO NOT CALL THESE TWO FUNCTIONS BELOW. just use scanKeys() once and the unordered_maps will update.
 int16_t InputManager::getKeysHeld(uni_controller_t* controller)
 {
     int16_t keys_held = convertRawInput(controller);

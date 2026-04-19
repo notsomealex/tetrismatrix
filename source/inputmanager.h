@@ -36,6 +36,9 @@ namespace InputManager
     extern bool new_controller_found;
     extern std::vector<uni_hid_device_t*> devices;
     extern std::vector<uni_controller_t*> controllers;
+    extern std::unordered_map<uni_controller_t*, int16_t> keys_held;
+    extern std::unordered_map<uni_controller_t*, int16_t> keys_pressed;
+
 
     bool init();
     void searchForControllers();
@@ -45,6 +48,7 @@ namespace InputManager
     void onDeviceDisconnected(uni_hid_device_t* device);
     int16_t getKeysHeld(uni_controller_t* controller);
     int16_t getKeysPressed(uni_controller_t* controller);
+    void scanKeys();
     int16_t convertRawInput(uni_controller_t* controller);
     //void onControllerData(uni_controller_t* controller);
 }
