@@ -146,29 +146,7 @@ static void my_platform_on_controller_data(uni_hid_device_t* d, uni_controller_t
                 d->report_parser.play_dual_rumble(d, 0 /* delayed start ms */, 250 /* duration ms */,
                                                   0 /* weak magnitude */, 128 /* strong magnitude */);
             }
-            // Buttons: Control LEDs On/Off
-            if ((gp->buttons & BUTTON_X) && d->report_parser.set_player_leds != NULL) {
-                d->report_parser.set_player_leds(d, leds++ & 0x0f);
-            }
-            // Axis: control RGB color
-            if ((gp->buttons & BUTTON_Y) && d->report_parser.set_lightbar_color != NULL) {
-                uint8_t r = (gp->axis_x * 256) / 512;
-                uint8_t g = (gp->axis_y * 256) / 512;
-                uint8_t b = (gp->axis_rx * 256) / 512;
-                d->report_parser.set_lightbar_color(d, r, g, b);
-            }
-
-            // Toggle Bluetooth connections
-            if ((gp->buttons & BUTTON_SHOULDER_L) && enabled) {
-                logi("*** Disabling Bluetooth connections\n");
-                uni_bt_stop_scanning_safe();
-                enabled = false;
-            }
-            if ((gp->buttons & BUTTON_SHOULDER_R) && !enabled) {
-                logi("*** Enabling Bluetooth connections\n");
-                uni_bt_start_scanning_and_autoconnect_safe();
-                enabled = true;
-            }
+            
             break;
         case UNI_CONTROLLER_CLASS_BALANCE_BOARD:
             // Do something

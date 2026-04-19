@@ -118,13 +118,13 @@ void InputManager::searchForControllers()
 void InputManager::enablePairing()
 {
     // FUCKING API WAS BACKWARDS AAAAAAAAAA
-    uni_bt_enable_new_connections_safe(false);
+    uni_bt_enable_new_connections_safe(true);
     pairing_enabled = true;
 }
 
 void InputManager::disablePairing()
 {
-    uni_bt_enable_new_connections_safe(true);
+    uni_bt_enable_new_connections_safe(false);
     pairing_enabled = false;
 }
 
@@ -215,10 +215,10 @@ int16_t InputManager::convertRawInput(uni_controller_t* controller)
     if(controller->gamepad.buttons & BUTTON_SHOULDER_R || controller->gamepad.throttle >= 512)
         input |= KEY_R;
 
-    if(controller->gamepad.buttons & MISC_BUTTON_START)
+    if(controller->gamepad.misc_buttons & MISC_BUTTON_START)
         input |= KEY_START;
 
-    if(controller->gamepad.buttons & MISC_BUTTON_SELECT)
+    if(controller->gamepad.misc_buttons & MISC_BUTTON_SELECT)
         input |= KEY_SELECT;
 
     if(controller->gamepad.dpad & DPAD_UP || controller->gamepad.axis_y <= -256)

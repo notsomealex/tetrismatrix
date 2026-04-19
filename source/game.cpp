@@ -39,6 +39,11 @@ void tetrismatrix::initGame()
 
     Menu* main_menu = createMenu(Menus::MAIN_MENU);
     menus.push(main_menu);
+
+    while (InputManager::controllers_connected == 0)
+    {
+        InputManager::searchForControllers();
+    }
     
 
     // newMatch();
@@ -63,7 +68,7 @@ void tetrismatrix::updateGame()
 {
     // printf("updating game!!\n\n");
 
-    while (InputManager::controllers_connected == 0)
+    while (InputManager::controllers.empty())
     {
         InputManager::searchForControllers();
     }

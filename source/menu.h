@@ -21,11 +21,12 @@ class Menu
     };
     
     std::optional<Menus> menu_type;
-    
+
     std::string title;
     std::array<uint8_t, 3> title_color = {255, 255, 255};
     std::vector<Option> options;
     std::function<void()> callback;
+    bool selection_changed = false;
     int selected_index = 0;
     int scale = 2;
     int pos_x = SCREEN_WIDTH / 2;

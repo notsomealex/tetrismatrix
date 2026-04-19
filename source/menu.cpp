@@ -85,13 +85,14 @@ void Menu::displayMenu(PicoGraphics_PenRGB888& graphics, Hub75& hub75)
 
         if(i == selected_index)
         {
-            int16_t keys_pressed = InputManager::keys_pressed[InputManager::controllers[0]];
-            if(tetrismatrix::frames % 20 == 0 || (keys_pressed & KEY_UP) || (keys_pressed & KEY_DOWN))
+            arrow_pos_y = y;
+            int16_t keys_held = InputManager::keys_held[InputManager::controllers[0]];
+            if(tetrismatrix::frames % 20 == 0 || selection_changed)
             {
                 arrow_pos_x = (arrow_pos_x == x - 5) ? x - 4 : x - 5;
                 drawBitmap(hub75, arrow, arrow.size(), arrow[0].size(), arrow_pos_x, arrow_pos_y, tetrismatrix::vertical);
+                selection_changed = false;
             }
-            arrow_pos_y = y;
             //printf("arrow pos_x: %i pos_y %i\n\n\n", x, y);
             drawBitmap(hub75, arrow, arrow.size(), arrow[0].size(), arrow_pos_x, arrow_pos_y, tetrismatrix::vertical);
         }
@@ -135,6 +136,9 @@ void Menu::updateMenu(PicoGraphics_PenRGB888& graphics, Hub75& hub75)
 
     if(keys_pressed & KEY_UP)
         selected_index--;
+
+    if(keys_pressed & KEY_DOWN || keys_pressed & KEY_UP)
+        selection_changed = true;
 
     if(selected_index < 0)
         selected_index = options.size() - 1;
