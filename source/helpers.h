@@ -118,6 +118,7 @@ const uint16_t aGlyphs3x4[] =
     0x6C00, // 0x7E ~ 011 110 000
     0xA4A4  // 0x7F   101 010 101 010 // Alternative: Could even have a "full" 4x4 checkerboard
 };
+
 inline void setPixel(Hub75& hub75, int x, int y, int r, int g, int b, bool vertical)
 {
     if(vertical)
@@ -151,8 +152,6 @@ inline void cropTextToFit(std::string& text, int font_width, int pixels_limit)
 // TODO: MAYBE add a sliding text instead of just truncating for texts that dont fit.
 inline void draw4x3Text(Hub75& hub75, const std::string& text, int x, int y, int r, int g, int b, bool vertical)
 {
-
-
     if(text.size() != 0)
     {
         for(int i = 0; i < (int)text.size(); i++)
@@ -171,6 +170,42 @@ inline void draw4x3Text(Hub75& hub75, const std::string& text, int x, int y, int
     }
 }
 
+// since this uses the pico api, it needs a graphics object.
+inline void draw5x5Text(Hub75& hub75, PicoGraphics_PenRGB888& graphics, const std::string& text, int x, int y, int r, int g, int b, int vertical)
+{
+
+    graphics.clear();
+    graphics.set_pen(r, g, b);
+    int char_width = 6 * text.size();
+    int line_height = 7 * text.size();
+    int max_width = vertical ? SCREEN_HEIGHT : SCREEN_WIDTH;
+    
+    // split into lines
+    std::vector<std::string> lines;
+    std::string current_line;
+    std::stringstream ss(text);
+    std::string word;
+    while(ss >> word) 
+    {
+        std::string test = current_line.empty() ? word : current_line + " " + word;
+        if(test.size() * char_width > max_width) 
+        {
+            lines.push_back(current_line);
+            current_line = word;
+        } 
+        else 
+        {
+            current_line = test;
+        }
+    }
+    if(!current_line.empty()) lines.push_back(current_line);
+
+    float angle = vertical ? 270.0f : 0.0f;
+    for(auto& line: lines)
+    {
+        graphics.text(line, Point(x, y), 1, 1.0f, angle);
+    }
+}
 inline void drawBitmap(Hub75& hub75, std::vector<std::vector<int>> bitmap, int width, int height, int x, int y, bool vertical)
 {
     for(int i = 0; i < height; i++)

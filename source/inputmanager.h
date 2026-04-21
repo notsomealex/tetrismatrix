@@ -30,7 +30,6 @@ enum INPUT
 
 namespace InputManager
 {
-    extern int controllers_connected;
     extern bool connecting_controller;
     extern bool pairing_enabled;
     extern bool new_controller_found;
@@ -50,6 +49,8 @@ namespace InputManager
     int16_t getKeysPressed(uni_controller_t* controller);
     void scanKeys();
     int16_t convertRawInput(uni_controller_t* controller);
+    void clearInput(uni_controller_t* controller);
+    void clearAllInputs();
     //void onControllerData(uni_controller_t* controller);
 }
 

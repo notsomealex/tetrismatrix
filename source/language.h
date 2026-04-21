@@ -18,7 +18,13 @@ enum class Texts
     CONNECTED,
     RESUME,
     EXIT,
-    PAUSE
+    PAUSE,
+    ZEN,
+    MARATHON,
+    VERSUS,
+    COOP,
+    DUAL_BOARD,
+    GAME_MODE
 };
 using enum Texts;
 
@@ -39,7 +45,13 @@ inline Translations translations = {
             {CONNECTED, "CONNECTED"},
             {RESUME, "RESUME"},
             {EXIT, "EXIT"},
-            {PAUSE, "PAUSE"}
+            {PAUSE, "PAUSE"},
+            {ZEN, "ZEN"},
+            {MARATHON, "MARATHON"},
+            {VERSUS, "VERSUS"},
+            {COOP, "COOP"},
+            {DUAL_BOARD, "DUAL BOARD"},
+            {GAME_MODE, "GAME MODE"}
         }
     },
     {
@@ -55,7 +67,13 @@ inline Translations translations = {
             {CONNECTED, "CONECTADO"},
             {RESUME, "REANUDAR"},
             {EXIT, "SALIR"},
-            {PAUSE, "PAUSA"}
+            {PAUSE, "PAUSA"},
+            {ZEN, "ZEN"},
+            {MARATHON, "MARATON"},
+            {VERSUS, "VERSUS"},
+            {COOP, "COOPERATIVO"},
+            {DUAL_BOARD, "DOS TABLEROS"},
+            {GAME_MODE, "MODOS"}
         }
     },
 };

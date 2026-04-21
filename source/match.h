@@ -3,11 +3,20 @@
 #include "piece.h"
 
 
+enum class GameModes
+{
+    ZEN,
+    MARATHON,
+    VERSUS,
+    COOP,
+    DUAL_BOARD
+};
+
 class Match
 {
 public:
-    Board *board = nullptr;
-    Piece *piece = nullptr;
+    std::vector<Board*> boards;
+    std::vector<Piece*> pieces;
 
 
     std::queue<PIECES> upcoming_pieces;
@@ -15,6 +24,7 @@ public:
 
     // todo: add here all the match settings that come up.
     MatchSettings settings;
+    GameModes game_mode = GameModes::ZEN;
 
     void initMatch();
     void endMatch();
@@ -22,6 +32,6 @@ public:
     void setUpcomingPieces();
     void updateUpcomingPieces();
     Match();
-    Match(MatchSettings settings);
+    Match(MatchSettings settings, GameModes game_mode);
     ~Match();
 };

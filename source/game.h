@@ -79,6 +79,9 @@ namespace tetrismatrix
     void newMatch();
     void endMatch();
 
+    int screenWidth();
+    int screenHeight();
+
     Menu* createMenu(Menus menu_type);
 };
 

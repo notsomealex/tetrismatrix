@@ -32,7 +32,6 @@ void core1_program()
     btstack_run_loop_execute();
 }
 
-int InputManager::controllers_connected = 0;
 bool InputManager::connecting_controller = false;
 bool InputManager::pairing_enabled = false;
 bool InputManager::new_controller_found = false;
@@ -108,7 +107,6 @@ void InputManager::searchForControllers()
         cropTextToFit(connected, 4, limit);
         draw4x3Text(tetrismatrix::hub75, connected, x - (connected.size() * 4 / 2), y + 5, 255, 255 ,255, tetrismatrix::vertical);
 
-        controllers_connected++;
         new_controller_found = false;
         sleep_ms(3000);
         disablePairing();
@@ -117,7 +115,6 @@ void InputManager::searchForControllers()
 
 void InputManager::enablePairing()
 {
-    // FUCKING API WAS BACKWARDS AAAAAAAAAA
     uni_bt_enable_new_connections_safe(true);
     pairing_enabled = true;
 }
@@ -136,7 +133,6 @@ void InputManager::onDeviceConnected(uni_hid_device_t* device)
     {
         printf("controller connected!");
         controllers.push_back(&device->controller);
-        controllers_connected++;
         new_controller_found = true;
     }
     else
@@ -154,7 +150,6 @@ void InputManager::onDeviceDisconnected(uni_hid_device_t* device)
     if(device->controller.klass & UNI_CONTROLLER_CLASS_GAMEPAD)
     {
         std::erase(controllers, &device->controller);
-        controllers_connected--;
     }
 }
 
@@ -234,6 +229,21 @@ int16_t InputManager::convertRawInput(uni_controller_t* controller)
         input |= KEY_RIGHT;
 
     return input;
+}
+
+// will clear the input for the current frame. useful for menus for example, when one doesnt want to triger an action on the match when exiting the menu.
+void InputManager::clearInput(uni_controller_t* controller)
+{
+    keys_held[controller] = 0;
+    keys_pressed[controller] = 0;
+}
+
+void InputManager::clearAllInputs()
+{
+    for(auto& controller : controllers)
+    {
+        clearInput(controller);
+    }
 }
 
 

@@ -24,7 +24,8 @@ enum class Menus
     MAIN_MENU,
     OPTIONS,
     SCORES,
-    PAUSE
+    PAUSE,
+    GAME_MODE_SELECTION
 };
 
 enum PIECES

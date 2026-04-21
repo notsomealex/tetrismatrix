@@ -40,10 +40,6 @@ void tetrismatrix::initGame()
     Menu* main_menu = createMenu(Menus::MAIN_MENU);
     menus.push(main_menu);
 
-    while (InputManager::controllers_connected == 0)
-    {
-        InputManager::searchForControllers();
-    }
     
 
     // newMatch();
@@ -73,10 +69,10 @@ void tetrismatrix::updateGame()
         InputManager::searchForControllers();
     }
 
-    InputManager::scanKeys();
-
     // we clear the screan each frame.
     hub75.clear();
+
+    InputManager::scanKeys(); 
 
     if(!menus.empty())
     {
@@ -106,7 +102,7 @@ Menu* tetrismatrix::createMenu(Menus menu_type)
                 Menu::Option(
                     translate(current_language, Texts::START),
                     []()
-                    {if(current_match == nullptr) current_match = new Match(settings.match_settings); },
+                    {menus.push(createMenu(Menus::GAME_MODE_SELECTION)); InputManager::clearAllInputs();},
                     0,
                     true),
 
@@ -140,17 +136,61 @@ Menu* tetrismatrix::createMenu(Menus menu_type)
                 Menu::Option(
                 translate(current_language, Texts::RESUME),
                 []()
-                { menus.pop();},
+                { menus.pop(); InputManager::clearAllInputs();},
                 0,
                 true),
                 Menu::Option(
                 translate(current_language, Texts::EXIT),
                 []()
-                { if(current_match != nullptr) delete current_match; current_match = nullptr; menus.pop(); menus.top()->hide_menu = false;},
+                { if(current_match != nullptr) delete current_match; current_match = nullptr; menus.pop(); menus.top()->hide_menu = false; InputManager::clearAllInputs();},
                 0,
                 true)
             };
             title = translate(current_language, PAUSE);
+            pos_x = vertical ? SCREEN_HEIGHT / 2 : SCREEN_WIDTH / 2 - 2;
+            pos_y = vertical ? SCREEN_HEIGHT / 2 - 3 : SCREEN_HEIGHT / 2 - 3;
+            break;
+
+        case Menus::GAME_MODE_SELECTION:
+        options = {
+            {
+                Menu::Option(
+                    translate(current_language, Texts::ZEN),
+                    []()
+                    {if(current_match == nullptr) current_match = new Match(settings.match_settings, GameModes::ZEN); InputManager::clearAllInputs();},
+                    0,
+                    true),
+
+                Menu::Option(
+                    translate(current_language, Texts::MARATHON),
+                    []()
+                    {if(current_match == nullptr) current_match = new Match(settings.match_settings, GameModes::MARATHON); InputManager::clearAllInputs();}, 
+                    0,
+                    true),
+
+                Menu::Option(
+                    translate(current_language, Texts::VERSUS),
+                    []()
+                    {if(current_match == nullptr) current_match = new Match(settings.match_settings, GameModes::VERSUS); InputManager::clearAllInputs();},
+                    0,
+                    true),
+
+                Menu::Option(
+                    translate(current_language, Texts::COOP),
+                    []()
+                    {if(current_match == nullptr) current_match = new Match(settings.match_settings, GameModes::COOP); InputManager::clearAllInputs();},
+                    0,
+                    true),
+
+                Menu::Option(
+                    translate(current_language, Texts::DUAL_BOARD),
+                    []()
+                    {if(current_match == nullptr) current_match = new Match(settings.match_settings, GameModes::DUAL_BOARD); InputManager::clearAllInputs();}, 
+                    0,
+                    true),
+            }
+        };
+            title = translate(current_language, Texts::GAME_MODE);
             pos_x = vertical ? SCREEN_HEIGHT / 2 : SCREEN_WIDTH / 2 - 2;
             pos_y = vertical ? SCREEN_HEIGHT / 2 - 3 : SCREEN_HEIGHT / 2 - 3;
             break;
@@ -178,7 +218,24 @@ Menu* tetrismatrix::createMenu(Menus menu_type)
             break;
         case Menus::PAUSE:
             menu->menu_type = Menus::PAUSE;
+            menu->callback = [menu](){
+                if(InputManager::keys_pressed[InputManager::controllers[0]] & KEY_START)
+                {
+                    tetrismatrix::menus.pop();
+                    InputManager::clearAllInputs();
+                }
+            };
             break;
     }
     return menu;
+}
+
+int tetrismatrix::screenWidth()
+{
+    return tetrismatrix::vertical ? SCREEN_HEIGHT : SCREEN_WIDTH;
+}
+
+int tetrismatrix::screenHeight()
+{
+    return tetrismatrix::vertical ? SCREEN_WIDTH : SCREEN_HEIGHT;
 }
