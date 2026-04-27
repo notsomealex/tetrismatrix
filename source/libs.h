@@ -30,6 +30,7 @@
 #include <stack>
 #include "pico/mem_ops.h"
 #include <optional>
+#include <variant>
 using namespace pimoroni;
 
 #endif

@@ -31,5 +31,5 @@ public:
     void resetBoard();
 
     Board();
-    Board(int width, int height, int pos_x, int pos_y, int scale);
+    Board(int width, int height, int scale);
 };

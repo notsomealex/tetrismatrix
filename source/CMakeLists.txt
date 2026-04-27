@@ -39,3 +39,5 @@ pico_set_program_version(tetrismatrix "0.1")
 pico_enable_stdio_uart(tetrismatrix 1)
 pico_enable_stdio_usb(tetrismatrix 1)
 pico_add_extra_outputs(tetrismatrix)
+
+add_compile_definitions(PICO_FLASH_ASSUME_CORE1_SAFE=1)

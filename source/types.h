@@ -9,23 +9,14 @@
 
 
 
-struct MatchSettings
-    {
-        int max_amount_upcoming_pieces = 5; // 5 by default.
-        int game_scale = 2; // size of the squares
-        int board_width = 32 / game_scale;
-        int board_height = 64 / game_scale;
-        int board_pos_x = 0;
-        int board_pos_y = 0;
-    };
-
 enum class Menus
 {
     MAIN_MENU,
     OPTIONS,
     SCORES,
     PAUSE,
-    GAME_MODE_SELECTION
+    GAME_MODE_SELECTION,
+    MATCH_SETTINGS
 };
 
 enum PIECES
@@ -68,5 +59,13 @@ enum COLLISION_DIRECTION
     UP = (1 << 2),    // 00000100
     DOWN = (1 << 3)   // 00001000
 };
+
+struct EnumOption 
+{
+    int value;
+    std::vector<std::string> labels;
+};
+using OptionValue = std::variant<int, bool, float, std::string, EnumOption>;
+
 
 #endif

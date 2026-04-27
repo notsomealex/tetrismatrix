@@ -45,6 +45,9 @@ enum class Language;
 #define UART_TX_PIN 4
 #define UART_RX_PIN 5
 
+enum class GameModes;
+struct MatchSettings;
+
 
 namespace tetrismatrix
 {
@@ -60,17 +63,21 @@ namespace tetrismatrix
 
     extern bool vertical;
 
+    extern GameModes selected_game_mode;
+    extern MatchSettings selected_match_settings;
 
-    extern Language current_language;
+
 
     extern std::stack<Menu*> menus;
 
-    struct Settings
+
+    struct GameSettings
     {
-        MatchSettings match_settings;
-        // TODO: rest of settings.
+        OptionValue volume_sfx = 100;
+        OptionValue volume_music = 100;
+        OptionValue current_language;
     };
-    extern Settings settings;
+    extern GameSettings settings;
 
 
     

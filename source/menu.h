@@ -1,7 +1,6 @@
 #include "libs.h"
 #include "types.h"
 
-using OptionValue = std::variant<int, bool, float, std::string>;
 
 
 
@@ -12,12 +11,14 @@ class Menu
     {
         public:
         std::string name;
-        OptionValue associated_value;
+        OptionValue* associated_value = nullptr;
+        int associated_value_min = 0;
+        int associated_value_max = INT_MAX;
         bool visible = true;
 
         std::function<void()> on_click;
-        Option(std::string name, std::function<void()> on_click, OptionValue associated_value, bool visible);
-
+        Option(std::string name, std::function<void()> on_click, OptionValue* associated_value, int associateed_value_min, int associated_value_max, bool visible);
+        Option(std::string name, std::function<void()> on_click, bool visible);
     };
     
     std::optional<Menus> menu_type;
@@ -29,8 +30,8 @@ class Menu
     bool selection_changed = false;
     int selected_index = 0;
     int scale = 2;
-    int pos_x = SCREEN_WIDTH / 2;
-    int pos_y = SCREEN_HEIGHT / 2;
+    int pos_x = 0;
+    int pos_y = 0;
     int arrow_pos_x = 0;
     int arrow_pos_y = 0;
     std::array<uint8_t, 3> arrow_color = {255, 255, 255};
@@ -39,7 +40,8 @@ class Menu
     void displayMenu(PicoGraphics_PenRGB888& graphics, Hub75& hub75);
     void updateMenu(PicoGraphics_PenRGB888& graphics, Hub75& hub75);
     void executeSelectedOption();
+    void modifySelectedOptionValue();
 
-    Menu(std::string title, std::vector<Option> options, int pos_x, int pos_y, std::function<void()> callback);
+    Menu(std::string title, std::vector<Option> options, std::function<void()> callback);
     Menu(std::vector<Option> options);
 };

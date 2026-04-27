@@ -3,7 +3,8 @@
 enum class Language
 {
     EN,
-    ES
+    ES,
+    SIZE
 };
 
 enum class Texts
@@ -24,7 +25,24 @@ enum class Texts
     VERSUS,
     COOP,
     DUAL_BOARD,
-    GAME_MODE
+    GAME_MODE,
+    VOLUME_SFX,
+    VOLUME_MUSIC,
+    UPCOMING_PIECES,
+    GAME_SCALE,
+    BOARD_WIDTH,
+    BOARD_HEIGHT,
+    VELOCITY,
+    LOCK_DELAY,
+    MAX_VELOCITY,
+    GARBAGE_MULTIPLIER,
+    GARBAGE_BLOCKING,
+    LANGUAGE,
+    SETTINGS,
+    YES,
+    NO,
+    ENGLISH,
+    SPANISH
 };
 using enum Texts;
 
@@ -51,7 +69,22 @@ inline Translations translations = {
             {VERSUS, "VERSUS"},
             {COOP, "COOP"},
             {DUAL_BOARD, "DUAL BOARD"},
-            {GAME_MODE, "GAME MODE"}
+            {GAME_MODE, "GAME MODE"},
+            {VOLUME_SFX, "VOLUME SFX"},
+            {VOLUME_MUSIC, "VOLUME MUSIC"},
+            {UPCOMING_PIECES,"UPCOMING PIECES"},
+            {GAME_SCALE, "GAME SCALE"},
+            {BOARD_WIDTH, "BOARD WIDTH"},
+            {BOARD_HEIGHT, "BOARD HEIGHT"},
+            {VELOCITY, "VELOCITY"},
+            {LOCK_DELAY, "LOCK DELAY"},
+            {MAX_VELOCITY, "MAX VELOCITY"},
+            {GARBAGE_MULTIPLIER, "GARBAGE MULTIPLIER"},
+            {GARBAGE_BLOCKING, "GARBAGE BLOCKING"},
+            {LANGUAGE, "LANGUAGE"},
+            {SETTINGS, "SETTINGS"},
+            {YES, "YES"},
+            {NO, "NO"},
         }
     },
     {
@@ -73,7 +106,22 @@ inline Translations translations = {
             {VERSUS, "VERSUS"},
             {COOP, "COOPERATIVO"},
             {DUAL_BOARD, "DOS TABLEROS"},
-            {GAME_MODE, "MODOS"}
+            {GAME_MODE, "MODOS"},
+            {VOLUME_SFX, "VOLUMEN SFX"},
+            {VOLUME_MUSIC, "VOLUMEN MUSICA"},
+            {UPCOMING_PIECES,"PIEZAS PROXIMAS"},
+            {GAME_SCALE, "ESCALA"},
+            {BOARD_WIDTH, "ANCHO TABLERO"},
+            {BOARD_HEIGHT, "ALTO TABLERO"},
+            {VELOCITY, "VELOCIDAD"},
+            {LOCK_DELAY, "LOCK DELAY"},
+            {MAX_VELOCITY, "MAX VELOCIDAD"},
+            {GARBAGE_MULTIPLIER, "MULTIPLICADOR BASURA"},
+            {GARBAGE_BLOCKING, "BLOQUEO BASURA"},
+            {LANGUAGE, "IDIOMA"},
+            {SETTINGS, "CONFIGURACIONES"},
+            {YES, "SI"},
+            {NO, "NO"}
         }
     },
 };

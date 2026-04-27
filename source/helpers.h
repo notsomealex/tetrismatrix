@@ -149,9 +149,11 @@ inline void cropTextToFit(std::string& text, int font_width, int pixels_limit)
     if(text.size() * font_width >= pixels_limit)
         text.replace((pixels_limit / font_width) - 2, text.size() - (pixels_limit / font_width - 2), ".");
 }
-// TODO: MAYBE add a sliding text instead of just truncating for texts that dont fit.
-inline void draw4x3Text(Hub75& hub75, const std::string& text, int x, int y, int r, int g, int b, bool vertical)
+
+// the second parameter is not used, its just there for compatibility with the scrolling function.
+inline void draw4x3Text(Hub75& hub75, PicoGraphics_PenRGB888& graphics, const std::string& text, int x, int y, int r, int g, int b, bool vertical)
 {
+    
     if(text.size() != 0)
     {
         for(int i = 0; i < (int)text.size(); i++)
@@ -170,41 +172,48 @@ inline void draw4x3Text(Hub75& hub75, const std::string& text, int x, int y, int
     }
 }
 
+inline void drawScrollingText(Hub75& hub75, PicoGraphics_PenRGB888& graphics, const std::string& text, int x, int y, int r, int g, int b, bool vertical, int frames_to_scroll, int& new_pos_x, int frames, int font_width,
+    void(*drawing_function)(Hub75& hub75, PicoGraphics_PenRGB888& graphics, const std::string& text, int x, int y, int r, int g, int b, bool vertical))
+{
+    const int initial_offset = 5;
+
+    if(new_pos_x < (x - ((int)text.size() * font_width)))
+    {
+        new_pos_x += (vertical) ? (SCREEN_HEIGHT) : (SCREEN_WIDTH);
+        new_pos_x += + ((int)text.size() * font_width);
+    }
+        
+
+    if(frames % frames_to_scroll == 0)
+        new_pos_x--;
+
+    drawing_function(hub75, graphics, text, new_pos_x, y, r, g, b, vertical);
+
+
+}
+
 // since this uses the pico api, it needs a graphics object.
-inline void draw5x5Text(Hub75& hub75, PicoGraphics_PenRGB888& graphics, const std::string& text, int x, int y, int r, int g, int b, int vertical)
+inline void draw5x5Text(Hub75& hub75, PicoGraphics_PenRGB888& graphics, const std::string& text, int x, int y, int r, int g, int b, bool vertical)
 {
 
+    float angle = vertical ? 270.0f : 0.0f;
+
+    int pos_x = x - (vertical ? (6 / 2) * 6 : (12 / 2) * 6);
+    // i hate these hardcoded values but they must stick for now so that the title is actually centered :P
+    pos_x += vertical ? 3 : 6;
+    int count = std::ranges::count(text, ' ') + 1;
+    int pos_y = y - (count * 7);
+
+    if (vertical)
+    {
+        pos_x = SCREEN_HEIGHT - pos_x;
+        std::swap(pos_x, pos_y);
+    }
+
+    graphics.set_pen(0, 0, 0);
     graphics.clear();
     graphics.set_pen(r, g, b);
-    int char_width = 6 * text.size();
-    int line_height = 7 * text.size();
-    int max_width = vertical ? SCREEN_HEIGHT : SCREEN_WIDTH;
-    
-    // split into lines
-    std::vector<std::string> lines;
-    std::string current_line;
-    std::stringstream ss(text);
-    std::string word;
-    while(ss >> word) 
-    {
-        std::string test = current_line.empty() ? word : current_line + " " + word;
-        if(test.size() * char_width > max_width) 
-        {
-            lines.push_back(current_line);
-            current_line = word;
-        } 
-        else 
-        {
-            current_line = test;
-        }
-    }
-    if(!current_line.empty()) lines.push_back(current_line);
-
-    float angle = vertical ? 270.0f : 0.0f;
-    for(auto& line: lines)
-    {
-        graphics.text(line, Point(x, y), 1, 1.0f, angle);
-    }
+    graphics.text(text, Point(pos_x, pos_y), 1, 1.0f, angle);
 }
 inline void drawBitmap(Hub75& hub75, std::vector<std::vector<int>> bitmap, int width, int height, int x, int y, bool vertical)
 {
@@ -223,6 +232,7 @@ inline void drawBitmap(Hub75& hub75, std::vector<std::vector<int>> bitmap, int w
         }
     }
 }
+
 
 // accepts an array of size 3 that represents a color, and will change it once per call to this function.
 // so that several continuos calls make a rainbow effect:P

@@ -8,10 +8,10 @@ void Match::initMatch()
     srand(to_ms_since_boot(get_absolute_time()));
 
     // main boards and pieces.
-    boards.push_back(new Board(settings.board_width, settings.board_height, settings.board_pos_x, settings.board_pos_y, settings.game_scale));
-    pieces.push_back( new Piece(boards[0], upcoming_pieces, settings.game_scale));
+    boards.push_back(new Board(std::get<int>(settings.board_width), std::get<int>(settings.board_height), std::get<int>(settings.game_scale)));
+    pieces.push_back(new Piece(boards[0], upcoming_pieces, std::get<int>(settings.game_scale)));
     setUpcomingPieces();
-    tetrismatrix::menus.top()->hide_menu = true;
+
 }
 
 void Match::endMatch()
@@ -26,13 +26,18 @@ void Match::endMatch()
 
 void Match::updateMatch()
 {
-    if(menus.top()->menu_type == Menus::PAUSE)
+    if(paused)
+    {
         return;
+    }
     int16_t& keys_pressed = InputManager::keys_pressed[InputManager::controllers[0]];
 
 
     if(keys_pressed & KEY_START)
+    {
         menus.push(createMenu(Menus::PAUSE));
+        paused = true;
+    }
         
     printf("updating match!");
     boards[0]->updateBoard();
@@ -45,16 +50,36 @@ void Match::updateMatch()
     pieces[0]->updatePiece();
 
     
-    if (pieces[0]->checkCollision() & COLLISION_DIRECTION::UP)
+
+    // DIFFERENT GAME MODES //
+
+    switch(game_mode)
     {
-        boards[0]->resetBoard();
-        pieces[0]->restartPiece();
+        case GameModes::ZEN:
+            if (pieces[0]->checkCollision() & COLLISION_DIRECTION::UP)
+            {
+                boards[0]->resetBoard();
+                pieces[0]->restartPiece();
+            }
+            break;
+        case GameModes::MARATHON:
+            if(pieces[0]->just_solidified)
+                score += boards[0]->cleared_lines * 10;
+            break;
+        case GameModes::VERSUS:
+            while(InputManager::controllers.size() != 2)
+                InputManager::searchForControllers();
+            break;
+        case GameModes::COOP:
+            while(InputManager::controllers.size() != 2)
+                InputManager::searchForControllers();
+            break;
     }
 }
 
 void Match::setUpcomingPieces()
 {
-    for(int i = 0; i < settings.max_amount_upcoming_pieces; i++)
+    for(int i = 0; i < std::get<int>(settings.max_amount_upcoming_pieces); i++)
     {
         upcoming_pieces.push((PIECES)((rand() % 7) + 1));
     }
@@ -68,6 +93,11 @@ void Match::updateUpcomingPieces()
     upcoming_pieces.pop();
     upcoming_pieces.push((PIECES)((rand() % 7) + 1));
     pieces[0]->next_piece = next_piece;
+}
+
+void Match::gameOver()
+{
+
 }
 
 

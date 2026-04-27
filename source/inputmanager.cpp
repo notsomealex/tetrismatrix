@@ -77,16 +77,18 @@ void InputManager::searchForControllers()
     int x = tetrismatrix::vertical ? SCREEN_HEIGHT / 2 : SCREEN_WIDTH / 2;
     int y = tetrismatrix::vertical ? SCREEN_WIDTH / 2 : SCREEN_HEIGHT / 2;
 
-    int limit = tetrismatrix::vertical ? SCREEN_HEIGHT : SCREEN_WIDTH;
-    std::string searching = translate(tetrismatrix::current_language, Texts::SEARCHING);
-    cropTextToFit(searching, 3, limit);
-    draw4x3Text(tetrismatrix::hub75, searching, x - (searching.size() * 4 / 2), y, 255, 255 ,255, tetrismatrix::vertical);
-    
-    std::string controllers = translate(tetrismatrix::current_language, Texts::CONTROLLERS);
-    cropTextToFit(controllers, 3, limit - 12);
-    draw4x3Text(tetrismatrix::hub75, controllers, x - (controllers.size() * 4 / 2), y + 6, 255, 255 ,255, tetrismatrix::vertical);
+    Language current_language = (Language)std::get<EnumOption>(tetrismatrix::settings.current_language).value;
 
-    draw4x3Text(tetrismatrix::hub75, dots, x, y + 12, 255, 255 ,255, tetrismatrix::vertical);
+    int limit = tetrismatrix::vertical ? SCREEN_HEIGHT : SCREEN_WIDTH;
+    std::string searching = translate(current_language, Texts::SEARCHING);
+    cropTextToFit(searching, 3, limit);
+    draw4x3Text(tetrismatrix::hub75, tetrismatrix::graphics, searching, x - (searching.size() * 4 / 2), y, 255, 255 ,255, tetrismatrix::vertical);
+    
+    std::string controllers = translate(current_language, Texts::CONTROLLERS);
+    cropTextToFit(controllers, 3, limit - 12);
+    draw4x3Text(tetrismatrix::hub75, tetrismatrix::graphics, controllers, x - (controllers.size() * 4 / 2), y + 6, 255, 255 ,255, tetrismatrix::vertical);
+
+    draw4x3Text(tetrismatrix::hub75, tetrismatrix::graphics, dots, x, y + 12, 255, 255 ,255, tetrismatrix::vertical);
 
     // update the dots animation every half a second
     if(time % 500 == 0)
@@ -99,13 +101,13 @@ void InputManager::searchForControllers()
     if(new_controller_found)
     {
         tetrismatrix::hub75.clear();
-        std::string controller = translate(tetrismatrix::current_language, Texts::CONTROLLER);
+        std::string controller = translate(current_language, Texts::CONTROLLER);
         cropTextToFit(controller, 4, limit);
-        draw4x3Text(tetrismatrix::hub75, controller, x - (controller.size() * 4 / 2), y, 255, 255 ,255, tetrismatrix::vertical);
+        draw4x3Text(tetrismatrix::hub75, tetrismatrix::graphics, controller, x - (controller.size() * 4 / 2), y, 255, 255 ,255, tetrismatrix::vertical);
 
-        std::string connected = translate(tetrismatrix::current_language, Texts::CONNECTED);
+        std::string connected = translate(current_language, Texts::CONNECTED);
         cropTextToFit(connected, 4, limit);
-        draw4x3Text(tetrismatrix::hub75, connected, x - (connected.size() * 4 / 2), y + 5, 255, 255 ,255, tetrismatrix::vertical);
+        draw4x3Text(tetrismatrix::hub75, tetrismatrix::graphics, connected, x - (connected.size() * 4 / 2), y + 5, 255, 255 ,255, tetrismatrix::vertical);
 
         new_controller_found = false;
         sleep_ms(3000);
@@ -115,13 +117,13 @@ void InputManager::searchForControllers()
 
 void InputManager::enablePairing()
 {
-    uni_bt_enable_new_connections_safe(true);
+    uni_bt_enable_new_connections_safe(false);
     pairing_enabled = true;
 }
 
 void InputManager::disablePairing()
 {
-    uni_bt_enable_new_connections_safe(false);
+    uni_bt_enable_new_connections_safe(true);
     pairing_enabled = false;
 }
 
