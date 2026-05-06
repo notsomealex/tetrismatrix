@@ -112,18 +112,19 @@ void InputManager::searchForControllers()
         new_controller_found = false;
         sleep_ms(3000);
         disablePairing();
+        tetrismatrix::hub75.clear();
     }
 }
 
 void InputManager::enablePairing()
 {
-    uni_bt_enable_new_connections_safe(false);
+    uni_bt_enable_new_connections_safe(true);
     pairing_enabled = true;
 }
 
 void InputManager::disablePairing()
 {
-    uni_bt_enable_new_connections_safe(true);
+    uni_bt_enable_new_connections_safe(false);
     pairing_enabled = false;
 }
 
@@ -178,13 +179,13 @@ int16_t InputManager::getKeysHeld(uni_controller_t* controller)
 }
 int16_t InputManager::getKeysPressed(uni_controller_t* controller)
 {
-    static int16_t previous_input;
+    static std::unordered_map<uni_controller_t*, uint16_t> previous_input;
     int16_t current_input = convertRawInput(controller);
     
     int16_t keys_pressed = 0;
 
-    keys_pressed = current_input & ~previous_input;
-    previous_input = current_input;
+    keys_pressed = current_input & ~previous_input[controller];
+    previous_input[controller] = current_input;
 
     return keys_pressed;
 }

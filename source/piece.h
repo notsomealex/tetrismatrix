@@ -48,21 +48,27 @@ const std::vector<std::vector<int>> shapes[] =
         }
     };
 
+
 class Piece
 {
 public:
     int pos_x = 0;
     int pos_y = 0;
     int frames_moving = 0;
-    int falling_frequency = 15;
+    int falling_frequency = 60;
     int frames_colliding_down = 0;
     int frames_since_hit_ground = 0;
+    int lock_delay = 60;
+
+    uni_controller_t* controller;
+
+
 
     bool hit_ground = false;
     bool just_solidified = false;
     bool already_swapped = false;
 
-    std::queue<PIECES> &upcoming_pieces;
+    std::deque<PIECES>upcoming_pieces;
 
 
     Board *board = nullptr;
@@ -86,7 +92,7 @@ public:
     void printGhostPiece();
     void swapPiece();
 
-    Piece(Board *board, std::queue<PIECES> &upcoming_pieces, int scale);
+    Piece(Board *board, int scale, int falling_frequency, int lock_delay, uni_controller_t* controller);
 };
 
 #endif

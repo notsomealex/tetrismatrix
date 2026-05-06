@@ -215,7 +215,17 @@ inline void draw5x5Text(Hub75& hub75, PicoGraphics_PenRGB888& graphics, const st
     graphics.set_pen(r, g, b);
     graphics.text(text, Point(pos_x, pos_y), 1, 1.0f, angle);
 }
-inline void drawBitmap(Hub75& hub75, std::vector<std::vector<int>> bitmap, int width, int height, int x, int y, bool vertical)
+// had to do this since for some reason making this an inline function causes UB for some reason :DDDDDDD
+#define drawSquare(hub75, size, x, y, r, g, b)\
+    for(int i = 0; i < size; i++)\
+    {\
+        for(int j = 0; j < size; j++)\
+        {\
+            hub75.set_pixel(x + j, y + i, r, g, b);\
+        }\
+    }
+    
+inline void drawBitmap(Hub75& hub75, std::vector<std::vector<int>> bitmap, int width, int height, int x, int y, bool vertical, int scale)
 {
     for(int i = 0; i < height; i++)
     {
@@ -228,7 +238,24 @@ inline void drawBitmap(Hub75& hub75, std::vector<std::vector<int>> bitmap, int w
             uint8_t r = (color >> 16) & 0xFF;
             uint8_t g = (color >> 8) & 0xFF;
             uint8_t b = color & 0xFF;
-            setPixel(hub75, point_x, point_y, r, g, b, vertical);
+            if(vertical)
+            {
+                point_x = SCREEN_HEIGHT - point_x;
+                std::swap(point_x, point_y);
+            }
+            drawSquare(hub75, scale, point_x, point_y, r, g, b);
+        }
+    }
+}
+
+inline void clearRegionOfScreen(Hub75 hub75, int x1, int y1, int x2, int y2, bool vertical)
+{
+
+    for(int i = y1; i < y2; i++)
+    {
+        for(int j = x1; j < x2; j++)
+        {
+           setPixel(hub75, i, j, 0, 0, 0, vertical); 
         }
     }
 }
@@ -261,14 +288,4 @@ inline void rainbowEffect(std::array<uint8_t, 3>& rgb, std::array<int, 3>& incre
 }
 
 
-// had to do this since for some reason making this an inline function causes UB for some reason :DDDDDDD
-#define drawSquare(hub75, size, x, y, r, g, b)\
-    for(int i = 0; i < size; i++)\
-    {\
-        for(int j = 0; j < size; j++)\
-        {\
-            hub75.set_pixel(x + j, y + i, r, g, b);\
-        }\
-    }
-    
 #endif

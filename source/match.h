@@ -32,6 +32,77 @@ struct MatchSettings
 
 };
 
+inline std::unordered_map<GameModes, MatchSettings> default_settings
+{
+    {
+        GameModes::ZEN, 
+        {
+            .max_amount_upcoming_pieces = 5,
+            .game_scale = 2,
+            .board_width = 32 / 2,
+            .board_height = (64 / 2),
+            .velocity = 1,
+            .lock_delay = 60, 
+        }
+    },
+    {
+        GameModes::MARATHON,
+        {
+            .max_amount_upcoming_pieces = 5,
+            .game_scale = 2,
+            .board_width = 10,
+            .board_height = 20,
+            .velocity = 1,
+            .lock_delay = 60, 
+
+            .max_velocity = 10,
+        }
+    },
+    {
+        GameModes::VERSUS,
+        {
+            .max_amount_upcoming_pieces = 5,
+            .game_scale = 2,
+            .board_width = 10,
+            .board_height = 16,
+            .velocity = 1,
+            .lock_delay = 60, 
+
+            .max_velocity = 10,
+
+            .garbage_multiplier = 1,
+            .garbage_blocking = 1
+        }
+    },
+    {
+        GameModes::COOP,
+        {
+            .max_amount_upcoming_pieces = 5,
+            .game_scale = 2,
+            .board_width = 30,
+            .board_height = 20,
+            .velocity = 1,
+            .lock_delay = 60, 
+
+            .max_velocity = 10,
+        }
+    },
+    {
+        GameModes::DUAL_BOARD,
+        {
+            .max_amount_upcoming_pieces = 5,
+            .game_scale = 2,
+            .board_width = 10,
+            .board_height = 20,
+            .velocity = 1,
+            .lock_delay = 60, 
+
+            .max_velocity = 10,
+        }
+    }
+
+};
+
 class Match
 {
 public:
@@ -39,14 +110,14 @@ public:
     std::vector<Piece*> pieces;
 
 
-    std::queue<PIECES> upcoming_pieces;
-
-
     MatchSettings settings;
     GameModes game_mode = GameModes::ZEN;
 
-    int score = 0;
-    int lines_cleared = 0;
+    std::unordered_map<Board*, int> scores;
+    std::unordered_map<Board*, int> total_lines_cleared;
+    std::unordered_map<Board*, int> current_velocity_lines_cleared;
+
+    
     std::string date;
     
     bool paused = false;
@@ -54,9 +125,11 @@ public:
     void initMatch();
     void endMatch();
     void updateMatch();
-    void setUpcomingPieces();
-    void updateUpcomingPieces();
+    void setUpcomingPieces(Piece* piece);
+    void updateUpcomingPieces(Piece* piece);
+    void showUpcomingPieces(Piece* piece, int pos_x, int pos_y, bool vertical, bool show_text);
     void gameOver();
+    void gameWin();
     Match();
     Match(MatchSettings settings, GameModes game_mode);
     ~Match();

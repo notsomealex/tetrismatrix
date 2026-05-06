@@ -2,15 +2,49 @@
 #include "board.h"
 #include "piece.h"
 #include "menu.h"
+#include "helpers.h"
+#include "language.h"
 #include "inputmanager.h"
 void Match::initMatch()
 {
     srand(to_ms_since_boot(get_absolute_time()));
 
+
     // main boards and pieces.
     boards.push_back(new Board(std::get<int>(settings.board_width), std::get<int>(settings.board_height), std::get<int>(settings.game_scale)));
-    pieces.push_back(new Piece(boards[0], upcoming_pieces, std::get<int>(settings.game_scale)));
-    setUpcomingPieces();
+    pieces.push_back(new Piece(boards[0], std::get<int>(settings.game_scale), 30 / std::get<int>(settings.velocity), std::get<int>(settings.lock_delay), InputManager::controllers[0]));
+
+    switch(game_mode)
+    {
+        case GameModes::VERSUS:
+            tetrismatrix::vertical = false;
+            while(InputManager::controllers.size() != 2)
+                InputManager::searchForControllers();
+            boards.push_back(new Board(std::get<int>(settings.board_width), std::get<int>(settings.board_height), std::get<int>(settings.game_scale)));
+            pieces.push_back(new Piece(boards[1], std::get<int>(settings.game_scale), 30 / std::get<int>(settings.velocity), std::get<int>(settings.lock_delay), InputManager::controllers[1]));
+
+            boards[0]->board_pos_x += (boards[0]->board_pos_x * std::get<int>(settings.game_scale)) / 2;
+            boards[0]->board_pos_y = 0;
+            boards[1]->board_pos_x = 3 * boards[0]->board_pos_x;
+            boards[1]->board_pos_y = 0;
+            break;
+        case GameModes::COOP:
+            tetrismatrix::vertical = false;
+            while(InputManager::controllers.size() != 2)
+                InputManager::searchForControllers();
+            pieces.push_back(new Piece(boards[0], std::get<int>(settings.game_scale), 30 / std::get<int>(settings.velocity), std::get<int>(settings.lock_delay), InputManager::controllers[1]));
+            break;
+        case GameModes::MARATHON:
+
+            break;
+    }
+
+    for(int i = 0; i < pieces.size(); i++)
+    {
+        setUpcomingPieces(pieces[i]);
+    }
+
+    tetrismatrix::hub75.clear();
 
 }
 
@@ -27,9 +61,8 @@ void Match::endMatch()
 void Match::updateMatch()
 {
     if(paused)
-    {
         return;
-    }
+
     int16_t& keys_pressed = InputManager::keys_pressed[InputManager::controllers[0]];
 
 
@@ -40,14 +73,24 @@ void Match::updateMatch()
     }
         
     printf("updating match!");
-    boards[0]->updateBoard();
     
-    if(pieces[0]->just_solidified)
+    for(int i = 0; i < boards.size(); i++)
     {
-        updateUpcomingPieces();
-        pieces[0]->just_solidified = false;
+        boards[i]->updateBoard();
     }
-    pieces[0]->updatePiece();
+
+    for(int i = 0; i < pieces.size(); i++)
+    {
+        if(pieces[i]->just_solidified)
+        {
+            updateUpcomingPieces(pieces[i]);
+            pieces[i]->just_solidified = false;
+            scores[boards[i]] += boards[i]->cleared_lines * 10 * std::get<int>(settings.velocity);
+            total_lines_cleared[boards[i]] += boards[i]->cleared_lines;
+            current_velocity_lines_cleared[boards[i]] += boards[i]->cleared_lines;
+        }
+        pieces[i]->updatePiece();
+    }
 
     
 
@@ -63,39 +106,100 @@ void Match::updateMatch()
             }
             break;
         case GameModes::MARATHON:
-            if(pieces[0]->just_solidified)
-                score += boards[0]->cleared_lines * 10;
+        {
+            showUpcomingPieces(pieces[0], pieces[0]->board->board_pos_x, pieces[0]->board->board_pos_y - 10, false, true);
+            int& velocity = std::get<int>(settings.velocity);
+            int& max_velocity = std::get<int>(settings.max_velocity);
+            printf("lines: %i", current_velocity_lines_cleared[boards[0]]);
+            printf("velocity: %i", velocity);
+            if(current_velocity_lines_cleared[boards[0]] > 20)
+            {
+                if(velocity < max_velocity)
+                {
+                    velocity++;
+                    pieces[0]->falling_frequency = 30 / velocity;
+                    current_velocity_lines_cleared[boards[0]] = 0;
+                }
+                else
+                {
+                    gameWin();
+                }
+            }
             break;
+        }
         case GameModes::VERSUS:
             while(InputManager::controllers.size() != 2)
                 InputManager::searchForControllers();
+            for(int i = 0; i < pieces.size(); i++)
+            {
+                showUpcomingPieces(pieces[i], pieces[i]->board->board_pos_x, pieces[i]->board->board_pos_y, true, false);
+            }
+
+    printf("frames_colliding_down: %d, frames_since_hit_ground: %d, collision: %d\n", 
+        pieces[1]->frames_colliding_down, pieces[1]->frames_since_hit_ground, pieces[1]->checkCollision());
+
             break;
         case GameModes::COOP:
             while(InputManager::controllers.size() != 2)
                 InputManager::searchForControllers();
+            showUpcomingPieces(pieces[0], pieces[0]->board->board_pos_x, pieces[0]->board->board_pos_y - 10, true, false);
+            showUpcomingPieces(pieces[1], pieces[1]->board->board_pos_x + 10, pieces[1]->board->board_pos_y - 10, true, false);
             break;
     }
 }
 
-void Match::setUpcomingPieces()
+void Match::setUpcomingPieces(Piece* piece)
 {
     for(int i = 0; i < std::get<int>(settings.max_amount_upcoming_pieces); i++)
     {
-        upcoming_pieces.push((PIECES)((rand() % 7) + 1));
+        piece->upcoming_pieces.push_back((PIECES)((rand() % 7) + 1));
     }
-    pieces[0]->next_piece = upcoming_pieces.front();
+    piece->next_piece = piece->upcoming_pieces.front();
 
 }
 
-void Match::updateUpcomingPieces()
+void Match::updateUpcomingPieces(Piece* piece)
 {
-    PIECES next_piece = upcoming_pieces.front();
-    upcoming_pieces.pop();
-    upcoming_pieces.push((PIECES)((rand() % 7) + 1));
-    pieces[0]->next_piece = next_piece;
+    PIECES next_piece = piece->upcoming_pieces.front();
+    piece->upcoming_pieces.pop_front();
+    piece->upcoming_pieces.push_back((PIECES)((rand() % 7) + 1));
+    piece->next_piece = next_piece;
+}
+
+void Match::showUpcomingPieces(Piece* piece, int pos_x, int pos_y, bool vertical, bool show_text)
+{
+    /*
+    if(vertical)
+        clearRegionOfScreen(tetrismatrix::hub75, pos_x, pos_y, pos_x + (4 * piece->scale), pos_y + (4 * piece->scale * (piece->upcoming_pieces.size() + 1)), tetrismatrix::vertical);
+    else
+        clearRegionOfScreen(tetrismatrix::hub75, pos_x, pos_y, pos_x + (4 * piece->scale * (piece->upcoming_pieces.size() + 1)), pos_y + (4 * piece->scale), tetrismatrix::vertical);
+    */
+
+    if(show_text)
+    {
+        Language current_language = (Language)std::get<EnumOption>(tetrismatrix::settings.current_language).value;
+        std::string drawn_next_text = translate(current_language, Texts::NEXT);
+        cropTextToFit(drawn_next_text, 3, 15);
+        draw4x3Text(tetrismatrix::hub75, tetrismatrix::graphics, drawn_next_text, pos_x, pos_y, 255, 255, 255, tetrismatrix::vertical);
+    }
+    piece->printPiece(shapes[piece->next_piece], pos_x - piece->board->board_pos_x, pos_y - piece->board->board_pos_y, piece->scale);
+    for(int i = 0; i < piece->upcoming_pieces.size(); i++)
+    {
+        int piece_pos_x = vertical ? pos_x : pos_x + (piece->scale * (i + 1) * (shapes[piece->upcoming_pieces[i]][0].size() - 1));
+        int piece_pos_y = vertical ? pos_y + (piece->scale * (i + 1) * (shapes[piece->upcoming_pieces[i]].size() - 1)) : pos_y;
+        piece->printPiece(shapes[piece->upcoming_pieces[i]], piece_pos_x - piece->board->board_pos_x, piece_pos_y - piece->board->board_pos_y, piece->scale);
+    }
+    
+
+    
 }
 
 void Match::gameOver()
+{
+
+}
+
+void Match::gameWin()
 {
 
 }

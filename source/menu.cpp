@@ -21,7 +21,7 @@ Menu::Menu(std::string title, std::vector<Option> options, std::function<void()>
 {
     Option back_option("Back", []()
                        { tetrismatrix::menus.pop(); }, false);
-    options.push_back(back_option);
+    this->options.push_back(back_option);
 
     pos_x = tetrismatrix::vertical ? SCREEN_HEIGHT / 2 : SCREEN_WIDTH / 2 - 2;
     pos_y = tetrismatrix::vertical ? SCREEN_HEIGHT / 2 - 3 : SCREEN_HEIGHT / 2 - 3;
@@ -31,8 +31,8 @@ void Menu::displayMenu(PicoGraphics_PenRGB888 &graphics, Hub75 &hub75)
 {
 
     std::string cropped_title = title;
-    int limit = tetrismatrix::vertical ? SCREEN_HEIGHT : SCREEN_WIDTH;
-    cropTextToFit(cropped_title, 5, limit);
+    int horizontal_limit = tetrismatrix::vertical ? SCREEN_HEIGHT : SCREEN_WIDTH;
+    cropTextToFit(cropped_title, 5, horizontal_limit);
     if(cropped_title != title)
     {
         static int title_pos_x = pos_x;
@@ -57,22 +57,28 @@ void Menu::displayMenu(PicoGraphics_PenRGB888 &graphics, Hub75 &hub75)
 
         std::string text = options[i].name;
 
-        int x = (pos_x);
-        int y = (pos_y);
+        int x = pos_x;
+        int y = pos_y;
 
         if (tetrismatrix::vertical)
         {
             std::swap(x, y);
         }
+        int vertical_limit = tetrismatrix::vertical ? SCREEN_WIDTH : SCREEN_HEIGHT;
+        if((selected_index * scale * 4) + pos_y + 14 >= vertical_limit)
+        {
+            y -= 5 * (selected_index - 4);
+        }
 
         std::string drawn_text = text;
-        cropTextToFit(drawn_text, 4, limit);
+        cropTextToFit(drawn_text, 4, horizontal_limit);
 
         y += (i * scale * 4);
         x -= (i != selected_index) ? ((drawn_text.size() / 2) * 3) : ((text.size() / 2) * 3);
 
-        if(i != selected_index)
-            draw4x3Text(hub75, graphics, drawn_text, x, y, 255, 255, 255, tetrismatrix::vertical);
+        if(y >= pos_y)
+            if(i != selected_index)
+                draw4x3Text(hub75, graphics, drawn_text, x, y, 255, 255, 255, tetrismatrix::vertical);
 
         // printf("pos_x: %i pos_y: %i", x, y);
 
@@ -83,10 +89,11 @@ void Menu::displayMenu(PicoGraphics_PenRGB888 &graphics, Hub75 &hub75)
             if (tetrismatrix::frames % 20 == 0 || selection_changed)
             {
                 arrow_pos_x = (arrow_pos_x == x - 5) ? x - 4 : x - 5;
-                drawBitmap(hub75, arrow, arrow.size(), arrow[0].size(), arrow_pos_x, arrow_pos_y, tetrismatrix::vertical);
+                drawBitmap(hub75, arrow, arrow.size(), arrow[0].size(), arrow_pos_x, arrow_pos_y, tetrismatrix::vertical, 1);
                 selection_changed = false;
             }
             // printf("arrow pos_x: %i pos_y %i\n\n\n", x, y);
+
             if(text != drawn_text)
             {
                 static int option_pos_x = x;
@@ -100,7 +107,7 @@ void Menu::displayMenu(PicoGraphics_PenRGB888 &graphics, Hub75 &hub75)
                 draw4x3Text(hub75, graphics, drawn_text, x, y, 255, 255, 255, tetrismatrix::vertical);
             }
 
-            drawBitmap(hub75, arrow, arrow.size(), arrow[0].size(), arrow_pos_x, arrow_pos_y, tetrismatrix::vertical);        
+            drawBitmap(hub75, arrow, arrow.size(), arrow[0].size(), arrow_pos_x, arrow_pos_y, tetrismatrix::vertical, 1);        
         }
         else
             restart_option_scrolling &= ~(1 << i);
@@ -142,8 +149,11 @@ void Menu::updateMenu(PicoGraphics_PenRGB888 &graphics, Hub75 &hub75)
     if (keys_pressed & KEY_B)
     {
         // executes the back method.
-        if (tetrismatrix::menus.size() > 1)
-            tetrismatrix::menus.pop();
+        if(options.size() >= 1 && tetrismatrix::menus.size() > 1)
+        {
+            selected_index = options.size() - 1;
+            executeSelectedOption();
+        }
     }
 
     if (keys_pressed & KEY_DOWN)
@@ -156,8 +166,8 @@ void Menu::updateMenu(PicoGraphics_PenRGB888 &graphics, Hub75 &hub75)
         selection_changed = true;
 
     if (selected_index < 0)
-        selected_index = options.size() - 1;
-    if (selected_index > options.size() - 1)
+        selected_index = options.size() - 2;
+    if (selected_index > options.size() - 2)
         selected_index = 0;
 }
 
@@ -179,8 +189,20 @@ void Menu::modifySelectedOptionValue()
     tetrismatrix::menus.push(new Menu(options[selected_index].name, {}, 
     [this]()
     {
-        const int initial_left_pos_x = pos_x - 7;
-        const int initial_right_pos_x = pos_x + 5;
+        int initial_left_pos_x;
+        int initial_right_pos_x;
+        if(std::holds_alternative<int>(*options[selected_index].associated_value))
+        {
+            initial_left_pos_x = pos_x - (std::to_string(std::abs(std::get<int>(*options[selected_index].associated_value))).size() + 4);
+            initial_right_pos_x = pos_x + (std::to_string(std::abs(std::get<int>(*options[selected_index].associated_value))).size() + 5);
+        }
+        else if(std::holds_alternative<EnumOption>(*options[selected_index].associated_value))
+        {
+            auto value = std::get<EnumOption>(*options[selected_index].associated_value);
+            int offset = 5;
+            initial_left_pos_x = pos_x - (value.labels[value.value].size() / 2) * 4 - offset;
+            initial_right_pos_x = pos_x + (value.labels[value.value].size() / 2) * 4 + offset;
+        }
         static int left_pos_x = initial_left_pos_x;
         static int right_pos_x = initial_right_pos_x;
 
@@ -261,4 +283,17 @@ void Menu::modifySelectedOptionValue()
         draw4x3Text(tetrismatrix::hub75, tetrismatrix::graphics, ">", right_pos_x, pos_y + 10, 255, 255, 255, tetrismatrix::vertical);
 
     }));
+    /*
+    tetrismatrix::menus.top()->options[tetrismatrix::menus.top()->options.size() - 1].on_click =
+    [](){
+        // will reset the past menu, so that for example, languages can see immediate change.
+        tetrismatrix::menus.pop();
+        Menus menu_type = *tetrismatrix::menus.top()->menu_type;
+        tetrismatrix::menus.pop();
+        tetrismatrix::menus.push(tetrismatrix::createMenu(menu_type));
+        InputManager::clearAllInputs();
+        printf("stack size: %d\n", tetrismatrix::menus.size());
+printf("top menu title: %s\n", tetrismatrix::menus.top()->title.c_str());
+    };
+    */
 }

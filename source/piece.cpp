@@ -1,13 +1,12 @@
 #include "piece.h"
 #include "inputmanager.h"
 #include "helpers.h"
+#include "game.h"
+#include "match.h"
 void Piece::initPiece()
 {
     shape = (PIECES)((rand() % 7) + 1);
     current_piece_matrix = shapes[shape];
-
-    current_piece_matrix = shapes[shape];
-
     pos_x = board->boardCenter();
     pos_y = 0;
 }
@@ -26,8 +25,8 @@ void Piece::movePiece()
     //printf("moving piece!!!\n\n");
     //printf("piece pos_x: %i, piece pos_y: %i", this->pos_x, this->pos_y);
 
-    int16_t keys_pressed = InputManager::keys_pressed[InputManager::controllers[0]];
-    int16_t keys_held = InputManager::keys_held[InputManager::controllers[0]];
+    int16_t keys_pressed = InputManager::keys_pressed[controller];
+    int16_t keys_held = InputManager::keys_held[controller];
 
 
     if(keys_held & KEY_L || keys_held & KEY_R)
@@ -97,7 +96,7 @@ void Piece::movePiece()
     else
         frames_moving = 0;
 
-    if ((checkCollision() & COLLISION_DIRECTION::DOWN && (frames_colliding_down >= 60 || frames_since_hit_ground >= 240)))
+    if ((checkCollision() & COLLISION_DIRECTION::DOWN && (frames_colliding_down >= lock_delay || frames_since_hit_ground >= 240)))
     {
         just_solidified = true;
         solidifyPiece();
@@ -142,8 +141,7 @@ void Piece::printPiece(std::vector<std::vector<int>> piece_matrix, int pos_x, in
             if(current_block == NONE) continue;
 
             int x = vertical ? (pos_y + board->board_pos_y + i) * scale : (pos_x + board->board_pos_x + j) * scale;
-            int y = vertical ? (board->board_width - 1 - (pos_x + board->board_pos_x + j)) * scale : (pos_y + board->board_pos_y + i) * scale;
-            drawSquare(hub75, scale, x, y, piece_colors.at(current_block).r, piece_colors.at(current_block).g, piece_colors.at(current_block).b);
+            int y = vertical ? ((board->board_width - 1 - j + board->board_pos_x) * scale) - (pos_x * scale) : (pos_y + board->board_pos_y + i) * scale;            drawSquare(hub75, scale, x, y, piece_colors.at(current_block).r, piece_colors.at(current_block).g, piece_colors.at(current_block).b);
             //hub75.set_pixel(x, y, piece_colors.at(current_block).r, piece_colors.at(current_block).g, piece_colors.at(current_block).b);
         }
     }
@@ -345,7 +343,7 @@ void Piece::swapPiece()
     {
         hold_piece = old_piece;
         shape = upcoming_pieces.front();
-        upcoming_pieces.pop();
+        upcoming_pieces.pop_front();
     }
     else
     {
@@ -360,8 +358,8 @@ void Piece::swapPiece()
 
 
 // idk why i dont use more this syntax for constructors.
-Piece::Piece(Board *board, std::queue<PIECES> &upcoming_pieces, int scale)
-: board(board), upcoming_pieces(upcoming_pieces), scale(scale)
+Piece::Piece(Board *board, int scale, int falling_frequency, int lock_delay, uni_controller_t* controller)
+: board(board), scale(scale), falling_frequency(falling_frequency), lock_delay(lock_delay), controller(controller)
 {
     initPiece();
 }

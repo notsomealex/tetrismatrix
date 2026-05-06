@@ -65,6 +65,7 @@ namespace tetrismatrix
 
     extern GameModes selected_game_mode;
     extern MatchSettings selected_match_settings;
+    extern Language past_language;
 
 
 

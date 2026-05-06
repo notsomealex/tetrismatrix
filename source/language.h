@@ -42,7 +42,8 @@ enum class Texts
     YES,
     NO,
     ENGLISH,
-    SPANISH
+    SPANISH,
+    NEXT
 };
 using enum Texts;
 
@@ -85,6 +86,7 @@ inline Translations translations = {
             {SETTINGS, "SETTINGS"},
             {YES, "YES"},
             {NO, "NO"},
+            {NEXT, "NEXT"}
         }
     },
     {
@@ -121,7 +123,8 @@ inline Translations translations = {
             {LANGUAGE, "IDIOMA"},
             {SETTINGS, "CONFIGURACIONES"},
             {YES, "SI"},
-            {NO, "NO"}
+            {NO, "NO"},
+            {NEXT, "SIGUIENTE"}
         }
     },
 };

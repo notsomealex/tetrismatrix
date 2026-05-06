@@ -16,11 +16,13 @@ GameModes tetrismatrix::selected_game_mode = GameModes::ZEN;
 MatchSettings tetrismatrix::selected_match_settings;
 Hub75 tetrismatrix::hub75(SCREEN_WIDTH, SCREEN_HEIGHT, nullptr, PANEL_GENERIC, false);
 PicoGraphics_PenRGB888 tetrismatrix::graphics(hub75.width, hub75.height, nullptr);
+Language tetrismatrix::past_language;
 
 void tetrismatrix::initGame()
 {
-    EnumOption default_language = {(int)Language::ES, {"ENGLISH", "ESPAÑOL"}};
+    EnumOption default_language = {(int)Language::ES, {"ENGLISH", "ESPANOL"}};
     settings.current_language = default_language;
+    past_language = (Language)std::get<EnumOption>(settings.current_language).value;
     stdio_init_all();
     printf("starting\n");
 
@@ -66,8 +68,7 @@ void tetrismatrix::updateGame()
     // printf("updating game!!\n\n");
 
     
-    // we clear the screan each frame.
-    hub75.clear();
+  
 
     while (InputManager::controllers.empty())
     {
@@ -78,9 +79,26 @@ void tetrismatrix::updateGame()
 
     if(!menus.empty())
     {
+        if(menus.top()->menu_type.has_value())
+        {
+            if(past_language != (Language)std::get<EnumOption>(settings.current_language).value)
+            {
+                std::stack<Menus> menu_types;
+                while(!menus.empty())
+                {
+                    menu_types.push(*menus.top()->menu_type);
+                    menus.pop();
+                }
+                while(!menu_types.empty())
+                {
+                    menus.push(createMenu(menu_types.top()));
+                    menu_types.pop();
+                }
+                past_language = (Language)std::get<EnumOption>(settings.current_language).value;
+            }
+        }
         menus.top()->updateMenu(graphics, hub75);
     }
-
     if(current_match != nullptr)
         current_match->updateMatch();
 
@@ -95,7 +113,6 @@ Menu* tetrismatrix::createMenu(Menus menu_type)
     std::string title;
     int pos_x;
     int pos_y;
-    MatchSettings default_settings;
     Language current_language = (Language)std::get<EnumOption>(settings.current_language).value;
     Menu* menu = nullptr;
     switch(menu_type)
@@ -151,7 +168,7 @@ Menu* tetrismatrix::createMenu(Menus menu_type)
                     {InputManager::clearAllInputs();},
                     (OptionValue*)&settings.current_language,
                     0,
-                    (int)Language::SIZE,
+                    (int)Language::SIZE - 1,
                     true),
             }
         };
@@ -163,16 +180,17 @@ Menu* tetrismatrix::createMenu(Menus menu_type)
 
         case Menus::PAUSE:
             options = {
+                // APPARENTLY it is only needed to clear the screen here. dk why
                 Menu::Option(
                 translate(current_language, Texts::RESUME),
                 []()
-                { menus.pop(); current_match->paused = false; InputManager::clearAllInputs();},
+                { menus.pop(); current_match->paused = false; hub75.clear(); InputManager::clearAllInputs();},
                 true),
 
                 Menu::Option(
                 translate(current_language, Texts::EXIT),
                 []()
-                { if(current_match != nullptr) delete current_match; current_match = nullptr; menus.pop(); menus.top()->hide_menu = false; InputManager::clearAllInputs();},
+                { if(current_match != nullptr) delete current_match; current_match = nullptr; menus.pop(); menus.top()->hide_menu = false; InputManager::clearAllInputs(); if(!tetrismatrix::vertical) tetrismatrix::vertical = true;},
                 true)
             };
             title = translate(current_language, PAUSE);
@@ -183,32 +201,32 @@ Menu* tetrismatrix::createMenu(Menus menu_type)
             {
                 Menu::Option(
                     translate(current_language, Texts::ZEN),
-                    [default_settings]()
-                    {selected_game_mode = GameModes::ZEN; menus.push(createMenu(Menus::MATCH_SETTINGS)); InputManager::clearAllInputs();},
+                    []()
+                    {selected_game_mode = GameModes::ZEN; selected_match_settings = default_settings[GameModes::ZEN]; menus.push(createMenu(Menus::MATCH_SETTINGS)); InputManager::clearAllInputs();},
                     true),
 
                 Menu::Option(
                     translate(current_language, Texts::MARATHON),
-                    [default_settings]()
-                    {selected_game_mode = GameModes::MARATHON; menus.push(createMenu(Menus::MATCH_SETTINGS)); InputManager::clearAllInputs();}, 
+                    []()
+                    {selected_game_mode = GameModes::MARATHON; selected_match_settings = default_settings[GameModes::MARATHON]; menus.push(createMenu(Menus::MATCH_SETTINGS)); InputManager::clearAllInputs();}, 
                     true),
 
                 Menu::Option(
                     translate(current_language, Texts::VERSUS),
-                    [default_settings]()
-                    {selected_game_mode = GameModes::VERSUS; menus.push(createMenu(Menus::MATCH_SETTINGS)); InputManager::clearAllInputs();},
+                    []()
+                    {selected_game_mode = GameModes::VERSUS; selected_match_settings = default_settings[GameModes::VERSUS]; menus.push(createMenu(Menus::MATCH_SETTINGS)); InputManager::clearAllInputs();},
                     true),
 
                 Menu::Option(
                     translate(current_language, Texts::COOP),
-                    [default_settings]()
-                    {selected_game_mode = GameModes::COOP; menus.push(createMenu(Menus::MATCH_SETTINGS)); InputManager::clearAllInputs();},
+                    []()
+                    {selected_game_mode = GameModes::COOP; selected_match_settings = default_settings[GameModes::COOP]; menus.push(createMenu(Menus::MATCH_SETTINGS)); InputManager::clearAllInputs();},
                     true),
 
                 Menu::Option(
                     translate(current_language, Texts::DUAL_BOARD),
-                    [default_settings]()
-                    {selected_game_mode = GameModes::DUAL_BOARD; menus.push(createMenu(Menus::MATCH_SETTINGS)); InputManager::clearAllInputs();}, 
+                    []()
+                    {selected_game_mode = GameModes::DUAL_BOARD; selected_match_settings = default_settings[GameModes::DUAL_BOARD]; menus.push(createMenu(Menus::MATCH_SETTINGS)); InputManager::clearAllInputs();}, 
                     true),
             }
         };
@@ -218,6 +236,19 @@ Menu* tetrismatrix::createMenu(Menus menu_type)
         case Menus::MATCH_SETTINGS:
             options = {
             {
+                    Menu::Option(
+                    translate(current_language, Texts::VELOCITY),
+                    []()
+                    { InputManager::clearAllInputs();},
+                    (OptionValue*)&selected_match_settings.velocity,
+                    1,
+                    10,
+                    true)
+            }
+        };
+            if(selected_game_mode == GameModes::ZEN)
+            {
+                options.push_back(
                 Menu::Option(
                     translate(current_language, Texts::UPCOMING_PIECES),
                     []()
@@ -225,8 +256,9 @@ Menu* tetrismatrix::createMenu(Menus menu_type)
                     (OptionValue*)&selected_match_settings.max_amount_upcoming_pieces,
                     1,
                     10,
-                    true),
+                    true));
 
+                options.push_back(
                 Menu::Option(
                     translate(current_language, Texts::GAME_SCALE),
                     []()
@@ -234,8 +266,10 @@ Menu* tetrismatrix::createMenu(Menus menu_type)
                     (OptionValue*)&selected_match_settings.game_scale,
                     1,
                     5,
-                    true),
+                    true)
+                );
 
+                options.push_back(
                 Menu::Option(
                     translate(current_language, Texts::BOARD_WIDTH),
                     []()
@@ -243,8 +277,10 @@ Menu* tetrismatrix::createMenu(Menus menu_type)
                     (OptionValue*)&selected_match_settings.board_width,
                     5,
                     16,
-                    true),
+                    true)
+                );
 
+                options.push_back(
                 Menu::Option(
                     translate(current_language, Texts::BOARD_HEIGHT),
                     []()
@@ -252,30 +288,22 @@ Menu* tetrismatrix::createMenu(Menus menu_type)
                     (OptionValue*)&selected_match_settings.board_height,
                     10,
                     32,
-                    true),
-
-                Menu::Option(
-                    translate(current_language, Texts::VELOCITY),
-                    []()
-                    { InputManager::clearAllInputs();},
-                    (OptionValue*)&selected_match_settings.velocity,
-                    1,
-                    10,
-                    true),
+                    true)
+                );
                 
+                options.push_back(
                 Menu::Option(
                     translate(current_language, Texts::LOCK_DELAY),
                     []()
                     { InputManager::clearAllInputs();},
                     (OptionValue*)&selected_match_settings.lock_delay,
-                    10,
+                    0,
                     60,
-                    true),
-                    
+                    true));
             }
-        };
+                    
 
-            if(current_match->game_mode == GameModes::MARATHON)
+            if(selected_game_mode == GameModes::MARATHON)
                 options.push_back(Menu::Option(
                     translate(current_language, Texts::MAX_VELOCITY),
                     []()
@@ -285,7 +313,7 @@ Menu* tetrismatrix::createMenu(Menus menu_type)
                     10,
                     true));
 
-            if(current_match->game_mode == GameModes::VERSUS)
+            if(selected_game_mode == GameModes::VERSUS)
                 {
                     options.push_back(Menu::Option(
                     translate(current_language, Texts::GARBAGE_MULTIPLIER),
@@ -330,6 +358,8 @@ Menu* tetrismatrix::createMenu(Menus menu_type)
             };
             break;
         case Menus::OPTIONS:
+            menu->options[2].on_click = [](){past_language = (Language)std::get<EnumOption>(settings.current_language).value;
+};
             break;
         case Menus::SCORES:
             break;
@@ -340,11 +370,23 @@ Menu* tetrismatrix::createMenu(Menus menu_type)
                     tetrismatrix::menus.pop();
                     InputManager::clearAllInputs();
                     current_match->paused = false;
+                    hub75.clear();
+                }
+                if(InputManager::keys_pressed[InputManager::controllers[0]] & KEY_B)
+                {
+                    if(current_match != nullptr) 
+                        delete current_match; 
+                    current_match = nullptr; 
+                    menus.pop(); 
+                    menus.top()->hide_menu = false; 
+                    InputManager::clearAllInputs();
                 }
             };
             break;
             case Menus::GAME_MODE_SELECTION:
                 menu->callback = [](){};
+                break;
+        break;
     }
     menu->menu_type = menu_type;
     return menu;

@@ -12,25 +12,51 @@ void Board::initBoard()
             board_matrix[i][j] = 0; //(i % 6) + 1; <- RAINBOW
         }
     }
+if(tetrismatrix::vertical) 
+{
+    board_pos_x = ((SCREEN_HEIGHT / 2) - (board_width * scale / 2)) / scale;
+    board_pos_y = (SCREEN_WIDTH - (board_height * scale)) / scale;
+} 
+else 
+{
+    board_pos_x = (SCREEN_WIDTH / 2) - (board_width * scale / 2);
+    board_pos_y = 0;
+}
+    
 
 }
 
 void Board::printBoard()
 {
 
+    printf("board_pos_x: %d, board_pos_y: %d\n", board_pos_x, board_pos_y);
+    printf("board_width: %d, board_height: %d, scale: %d\n", board_width, board_height, scale);
     for (int i = 0; i < board_height; i++)
     {
         for (int j = 0; j < board_width; j++)
         {
             const PIECES current_block = (PIECES)board_matrix[i][j];
-            int x = vertical ? (i * scale) : (j * scale);
+            int x = vertical ? ((i + board_pos_y) * scale) : ((j + board_pos_x) * scale);
             // i dont like that i have to do this hack so that it doesnt show mirrored but mehhhhhhh
-            int y = vertical ? ((board_width - 1 - j) * scale) : (i * scale);
+            int y = vertical ? ((board_width - 1 - j + board_pos_x) * scale) : ((i + + board_pos_y) * scale);
             
             drawSquare(hub75, scale, x, y, piece_colors.at(current_block).r, piece_colors.at(current_block).g, piece_colors.at(current_block).b);
             //hub75.set_pixel(x, y, piece_colors.at(current_block).r, piece_colors.at(current_block).g, piece_colors.at(current_block).b);
         }
     }
+
+    // draw border
+    for(int i = -1; i <= board_height; i++) {
+    // left border
+    int x = vertical ? ((i + board_pos_y) * scale) : (((-1) + board_pos_x) * scale);
+    int y = vertical ? ((board_width + board_pos_x) * scale) : ((i + board_pos_y) * scale);
+    drawSquare(hub75, scale, x, y, 255, 255, 255);
+
+    // right border
+    x = vertical ? ((i + board_pos_y) * scale) : ((board_width + board_pos_x) * scale);
+    y = vertical ? (((-1) + board_pos_x) * scale) : ((i + board_pos_y) * scale);
+    drawSquare(hub75, scale, x, y, 255, 255, 255);
+}
 
 }
 
