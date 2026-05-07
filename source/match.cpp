@@ -23,9 +23,9 @@ void Match::initMatch()
             boards.push_back(new Board(std::get<int>(settings.board_width), std::get<int>(settings.board_height), std::get<int>(settings.game_scale)));
             pieces.push_back(new Piece(boards[1], std::get<int>(settings.game_scale), 30 / std::get<int>(settings.velocity), std::get<int>(settings.lock_delay), InputManager::controllers[1]));
 
-            boards[0]->board_pos_x += (boards[0]->board_pos_x * std::get<int>(settings.game_scale)) / 2;
+            boards[0]->board_pos_x += -1 + (boards[0]->board_pos_x * std::get<int>(settings.game_scale)) / 2;
             boards[0]->board_pos_y = 0;
-            boards[1]->board_pos_x = 3 * boards[0]->board_pos_x;
+            boards[1]->board_pos_x = 3 * boards[0]->board_pos_x + 2;
             boards[1]->board_pos_y = 0;
             break;
         case GameModes::COOP:
@@ -130,14 +130,8 @@ void Match::updateMatch()
         case GameModes::VERSUS:
             while(InputManager::controllers.size() != 2)
                 InputManager::searchForControllers();
-            for(int i = 0; i < pieces.size(); i++)
-            {
-                showUpcomingPieces(pieces[i], pieces[i]->board->board_pos_x, pieces[i]->board->board_pos_y, true, false);
-            }
-
-    printf("frames_colliding_down: %d, frames_since_hit_ground: %d, collision: %d\n", 
-        pieces[1]->frames_colliding_down, pieces[1]->frames_since_hit_ground, pieces[1]->checkCollision());
-
+            showUpcomingPieces(pieces[0], pieces[0]->board->board_pos_x - 5, pieces[0]->board->board_pos_y, true, false);
+            showUpcomingPieces(pieces[1], pieces[1]->board->board_pos_x + (pieces[1]->board->board_width) + 1, pieces[1]->board->board_pos_y, true, false);
             break;
         case GameModes::COOP:
             while(InputManager::controllers.size() != 2)
@@ -155,6 +149,7 @@ void Match::setUpcomingPieces(Piece* piece)
         piece->upcoming_pieces.push_back((PIECES)((rand() % 7) + 1));
     }
     piece->next_piece = piece->upcoming_pieces.front();
+    piece->upcoming_pieces.pop_front();
 
 }
 
@@ -168,25 +163,36 @@ void Match::updateUpcomingPieces(Piece* piece)
 
 void Match::showUpcomingPieces(Piece* piece, int pos_x, int pos_y, bool vertical, bool show_text)
 {
-    /*
-    if(vertical)
-        clearRegionOfScreen(tetrismatrix::hub75, pos_x, pos_y, pos_x + (4 * piece->scale), pos_y + (4 * piece->scale * (piece->upcoming_pieces.size() + 1)), tetrismatrix::vertical);
-    else
-        clearRegionOfScreen(tetrismatrix::hub75, pos_x, pos_y, pos_x + (4 * piece->scale * (piece->upcoming_pieces.size() + 1)), pos_y + (4 * piece->scale), tetrismatrix::vertical);
-    */
+    
+if(vertical)
+    clearRegionOfScreen(tetrismatrix::hub75, 
+        pos_x * piece->scale, 
+        pos_y * piece->scale, 
+        (pos_x + 4) * piece->scale, 
+        (pos_y + 4 * (piece->upcoming_pieces.size() + 1)) * piece->scale, 
+        tetrismatrix::vertical);
+else
+    clearRegionOfScreen(tetrismatrix::hub75, 
+        pos_x * piece->scale, 
+        pos_y * piece->scale, 
+        (pos_x + 4 * (piece->upcoming_pieces.size() + 1)) * piece->scale, 
+        (pos_y + 4 + 2) * piece->scale, 
+        tetrismatrix::vertical);
 
     if(show_text)
     {
         Language current_language = (Language)std::get<EnumOption>(tetrismatrix::settings.current_language).value;
         std::string drawn_next_text = translate(current_language, Texts::NEXT);
         cropTextToFit(drawn_next_text, 3, 15);
-        draw4x3Text(tetrismatrix::hub75, tetrismatrix::graphics, drawn_next_text, pos_x, pos_y, 255, 255, 255, tetrismatrix::vertical);
+        draw4x3Text(tetrismatrix::hub75, tetrismatrix::graphics, drawn_next_text, pos_x - 1, pos_y - 1, 255, 255, 255, tetrismatrix::vertical);
     }
+
+    const int spacing = 2 * piece->scale;
     piece->printPiece(shapes[piece->next_piece], pos_x - piece->board->board_pos_x, pos_y - piece->board->board_pos_y, piece->scale);
     for(int i = 0; i < piece->upcoming_pieces.size(); i++)
     {
-        int piece_pos_x = vertical ? pos_x : pos_x + (piece->scale * (i + 1) * (shapes[piece->upcoming_pieces[i]][0].size() - 1));
-        int piece_pos_y = vertical ? pos_y + (piece->scale * (i + 1) * (shapes[piece->upcoming_pieces[i]].size() - 1)) : pos_y;
+        int piece_pos_x = vertical ? pos_x : pos_x + (spacing * (i + 1));
+        int piece_pos_y = vertical ? pos_y + (spacing * (i + 1)) : pos_y;
         piece->printPiece(shapes[piece->upcoming_pieces[i]], piece_pos_x - piece->board->board_pos_x, piece_pos_y - piece->board->board_pos_y, piece->scale);
     }
     

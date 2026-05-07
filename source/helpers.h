@@ -248,16 +248,17 @@ inline void drawBitmap(Hub75& hub75, std::vector<std::vector<int>> bitmap, int w
     }
 }
 
-inline void clearRegionOfScreen(Hub75 hub75, int x1, int y1, int x2, int y2, bool vertical)
+inline void clearRegionOfScreen(Hub75& hub75, int x1, int y1, int x2, int y2, bool vertical)
 {
 
     for(int i = y1; i < y2; i++)
     {
         for(int j = x1; j < x2; j++)
         {
-           setPixel(hub75, i, j, 0, 0, 0, vertical); 
+           setPixel(hub75, j, i, 0, 0, 0, vertical); 
         }
     }
+    printf("x1: %i, y1: %i, x2: %i, y2: %i", x1, y1, x2, y2);
 }
 
 

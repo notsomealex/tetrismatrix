@@ -64,8 +64,9 @@ void Menu::displayMenu(PicoGraphics_PenRGB888 &graphics, Hub75 &hub75)
         {
             std::swap(x, y);
         }
-        int vertical_limit = tetrismatrix::vertical ? SCREEN_WIDTH : SCREEN_HEIGHT;
-        if((selected_index * scale * 4) + pos_y + 14 >= vertical_limit)
+        const int vertical_limit = tetrismatrix::vertical ? SCREEN_WIDTH : SCREEN_HEIGHT;
+        const int offset = tetrismatrix::vertical ? 14 : 7;
+        if((selected_index * scale * 4) + pos_y + offset >= vertical_limit)
         {
             y -= 5 * (selected_index - 4);
         }
