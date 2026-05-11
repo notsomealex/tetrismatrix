@@ -166,7 +166,7 @@ inline void draw4x3Text(Hub75& hub75, PicoGraphics_PenRGB888& graphics, const st
             }
             else
             {
-                printf("index out of array bounds!!\n\n");
+                //printf("index out of array bounds!!\n\n");
             }
         }
     }

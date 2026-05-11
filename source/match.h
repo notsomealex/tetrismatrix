@@ -117,6 +117,8 @@ public:
     std::unordered_map<Board*, int> total_lines_cleared;
     std::unordered_map<Board*, int> current_velocity_lines_cleared;
 
+    OptionValue name = ""; // PLACEHOLDER later actually save this name to the db.
+
     
     std::string date;
     

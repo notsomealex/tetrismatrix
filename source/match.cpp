@@ -287,6 +287,9 @@ else
 void Match::gameOver()
 {
     tetrismatrix::hub75.clear();
+    ended = true;
+    Language current_language = (Language)std::get<EnumOption>(tetrismatrix::settings.current_language).value;
+
     switch(game_mode)
     {
         case GameModes::MARATHON:
@@ -301,16 +304,30 @@ void Match::gameOver()
                     sleep_ms(5);
                 }
             }
-
+            draw5x5Text(tetrismatrix::hub75, tetrismatrix::graphics, translate(current_language, Texts::GAME_OVER), 20, 20, 255, 255, 255, tetrismatrix::vertical);
+            boards[0]->updateBoard();
             break;
     }
-    Language current_language = (Language)std::get<EnumOption>(tetrismatrix::settings.current_language).value;
-    draw5x5Text(tetrismatrix::hub75, tetrismatrix::graphics, translate(current_language, Texts::GAME_OVER), 20, 20, 255, 255, 255, tetrismatrix::vertical);
-    boards[0]->updateBoard();
 
     sleep_ms(3000);
-    tetrismatrix::menus.push(createMenu(Menus::GAME_OVER));
-    ended = true;
+    switch(game_mode)
+    {
+        case GameModes::MARATHON:
+        std::vector<Menu::Option> options = 
+        {
+            Menu::Option(translate(current_language, Texts::ENTER_YOUR_NAME),
+                [](){InputManager::clearAllInputs();},
+                &name,
+                10,
+                10,
+                true
+            )
+        };
+        tetrismatrix::menus.push(new Menu(options));
+        tetrismatrix::menus.top()->callback = [](){tetrismatrix::menus.pop(); tetrismatrix::menus.push(createMenu(Menus::GAME_OVER));};
+        tetrismatrix::menus.top()->executeSelectedOption();
+        break;
+    }
 }
 
 void Match::gameWin()

@@ -49,7 +49,8 @@ enum class Texts
     GAME_OVER,
     RETRY,
     SAVE,
-    SAVED
+    SAVED,
+    ENTER_YOUR_NAME
 };
 using enum Texts;
 
@@ -98,7 +99,8 @@ inline Translations translations = {
             {GAME_OVER, "GAME OVER"},
             {RETRY, "RETRY"},
             {SAVE, "SAVE"},
-            {SAVED, "SAVED"}
+            {SAVED, "SAVED"},
+            {ENTER_YOUR_NAME, "ENTER YOUR NAME"}
         }
     },
     {
@@ -142,7 +144,8 @@ inline Translations translations = {
             {GAME_OVER, "FIN DEL JUEGO"},
             {RETRY, "REINTENTAR"},
             {SAVE, "GUARDAR"},
-            {SAVED, "GUARDADO"}
+            {SAVED, "GUARDADO"},
+            {ENTER_YOUR_NAME, "INTRODUCE TU NOMBRE"}
         }
     },
 };
