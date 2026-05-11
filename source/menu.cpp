@@ -33,15 +33,26 @@ void Menu::displayMenu(PicoGraphics_PenRGB888 &graphics, Hub75 &hub75)
     std::string cropped_title = title;
     int horizontal_limit = tetrismatrix::vertical ? SCREEN_HEIGHT : SCREEN_WIDTH;
     cropTextToFit(cropped_title, 5, horizontal_limit);
+
+
+    std::istringstream iss(title);
+    std::vector<std::string> title_words;
+    std::string word;
+    while(iss >> word) 
+    {
+        title_words.push_back(word);
+    }
+    int draw_pos_y = pos_y + title_words.size() * 5;
+    int draw_pos_x = pos_x;
+
+
     if(cropped_title != title)
     {
-        static int title_pos_x = pos_x;
-        drawScrollingText(hub75, graphics, title, pos_x, pos_y, title_color[0], title_color[1], title_color[2], tetrismatrix::vertical, 4, title_pos_x, tetrismatrix::frames, 6, draw5x5Text);
+        static int title_pos_x = draw_pos_y;
+        drawScrollingText(hub75, graphics, title, draw_pos_x, draw_pos_y, title_color[0], title_color[1], title_color[2], tetrismatrix::vertical, 4, title_pos_x, tetrismatrix::frames, 6, draw5x5Text);
     }
     else
-        draw5x5Text(hub75, graphics, title, pos_x, pos_y, title_color[0], title_color[1], title_color[2], tetrismatrix::vertical);
-
-    hub75.update(&graphics);
+        draw5x5Text(hub75, graphics, title, draw_pos_x, draw_pos_y, title_color[0], title_color[1], title_color[2], tetrismatrix::vertical);
 
 
     // draws options.
@@ -57,27 +68,31 @@ void Menu::displayMenu(PicoGraphics_PenRGB888 &graphics, Hub75 &hub75)
 
         std::string text = options[i].name;
 
-        int x = pos_x;
-        int y = pos_y;
+        int x = draw_pos_x;
+        int y = draw_pos_y + 5;
+        //printf("pos_x: %i pos_y: %i", pos_x, pos_y);
 
-        if (tetrismatrix::vertical)
-        {
-            std::swap(x, y);
-        }
+
+
         const int vertical_limit = tetrismatrix::vertical ? SCREEN_WIDTH : SCREEN_HEIGHT;
-        const int offset = tetrismatrix::vertical ? 14 : 7;
-        if((selected_index * scale * 4) + pos_y + offset >= vertical_limit)
-        {
-            y -= 5 * (selected_index - 4);
-        }
+        const int offset = draw_pos_y;
+        int max_visible_options = (vertical_limit - draw_pos_y) / (scale * 4);
+        int scroll_offset = 0;
 
+        if(selected_index >= max_visible_options)
+            scroll_offset = (selected_index - max_visible_options + 1) * scale * 4;
+        y -= scroll_offset;
+        
         std::string drawn_text = text;
+        
         cropTextToFit(drawn_text, 4, horizontal_limit);
-
+        x -= (i != selected_index) ? ((drawn_text.size() / 2) * 4) : ((text.size() / 2) * 4);
         y += (i * scale * 4);
-        x -= (i != selected_index) ? ((drawn_text.size() / 2) * 3) : ((text.size() / 2) * 3);
+        
 
-        if(y >= pos_y)
+
+
+        if(y >= draw_pos_y)
             if(i != selected_index)
                 draw4x3Text(hub75, graphics, drawn_text, x, y, 255, 255, 255, tetrismatrix::vertical);
 
@@ -167,8 +182,15 @@ void Menu::updateMenu(PicoGraphics_PenRGB888 &graphics, Hub75 &hub75)
         selection_changed = true;
 
     if (selected_index < 0)
-        selected_index = options.size() - 2;
-    if (selected_index > options.size() - 2)
+    {
+        selected_index = options.size() - 1;
+        while(!options[selected_index].visible)
+            selected_index--;
+    }
+    while(!options[selected_index].visible)
+        selected_index++;
+
+    if (selected_index > options.size() - 1)
         selected_index = 0;
 }
 
@@ -176,6 +198,7 @@ void Menu::executeSelectedOption()
 {
     if(options.empty())
         return;
+
     if (options[selected_index].on_click != NULL)
         options[selected_index].on_click();
     else
@@ -249,9 +272,9 @@ void Menu::modifySelectedOptionValue()
                     if(value > max_value)
                         value = max_value;
                 }
-                printf("value: %i", value);
-                printf("max: %i", max_value);
-                printf("min: %i", min_value);
+                //printf("value: %i", value);
+                //printf("max: %i", max_value);
+                //printf("min: %i", min_value);
             }
             else if(std::holds_alternative<bool>(*options[selected_index].associated_value))
             {
@@ -284,17 +307,4 @@ void Menu::modifySelectedOptionValue()
         draw4x3Text(tetrismatrix::hub75, tetrismatrix::graphics, ">", right_pos_x, pos_y + 10, 255, 255, 255, tetrismatrix::vertical);
 
     }));
-    /*
-    tetrismatrix::menus.top()->options[tetrismatrix::menus.top()->options.size() - 1].on_click =
-    [](){
-        // will reset the past menu, so that for example, languages can see immediate change.
-        tetrismatrix::menus.pop();
-        Menus menu_type = *tetrismatrix::menus.top()->menu_type;
-        tetrismatrix::menus.pop();
-        tetrismatrix::menus.push(tetrismatrix::createMenu(menu_type));
-        InputManager::clearAllInputs();
-        printf("stack size: %d\n", tetrismatrix::menus.size());
-printf("top menu title: %s\n", tetrismatrix::menus.top()->title.c_str());
-    };
-    */
 }

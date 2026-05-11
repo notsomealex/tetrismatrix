@@ -214,6 +214,7 @@ inline void draw5x5Text(Hub75& hub75, PicoGraphics_PenRGB888& graphics, const st
     graphics.clear();
     graphics.set_pen(r, g, b);
     graphics.text(text, Point(pos_x, pos_y), 1, 1.0f, angle);
+    hub75.update(&graphics);
 }
 // had to do this since for some reason making this an inline function causes UB for some reason :DDDDDDD
 #define drawSquare(hub75, size, x, y, r, g, b)\
@@ -258,7 +259,7 @@ inline void clearRegionOfScreen(Hub75& hub75, int x1, int y1, int x2, int y2, bo
            setPixel(hub75, j, i, 0, 0, 0, vertical); 
         }
     }
-    printf("x1: %i, y1: %i, x2: %i, y2: %i", x1, y1, x2, y2);
+    //printf("x1: %i, y1: %i, x2: %i, y2: %i", x1, y1, x2, y2);
 }
 
 

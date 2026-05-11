@@ -113,7 +113,7 @@ public:
     MatchSettings settings;
     GameModes game_mode = GameModes::ZEN;
 
-    std::unordered_map<Board*, int> scores;
+    std::unordered_map<Piece*, int> scores;
     std::unordered_map<Board*, int> total_lines_cleared;
     std::unordered_map<Board*, int> current_velocity_lines_cleared;
 
@@ -121,13 +121,16 @@ public:
     std::string date;
     
     bool paused = false;
+    bool ended = false;
 
     void initMatch();
     void endMatch();
     void updateMatch();
     void setUpcomingPieces(Piece* piece);
     void updateUpcomingPieces(Piece* piece);
-    void showUpcomingPieces(Piece* piece, int pos_x, int pos_y, bool vertical, bool show_text);
+    void showUpcomingPieces(Piece* piece, int pos_x, int pos_y, bool vertical_layout, bool show_text);
+    void showScore(Piece* piece, int pos_x, int pos_y, bool vertical_layout, bool show_text);
+    void showHoldPiece(Piece* piece, int pos_x, int pos_y, bool vertical_layout, bool show_text);
     void gameOver();
     void gameWin();
     Match();

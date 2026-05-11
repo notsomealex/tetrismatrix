@@ -60,7 +60,7 @@ void Match::endMatch()
 
 void Match::updateMatch()
 {
-    if(paused)
+    if(paused || ended)
         return;
 
     int16_t& keys_pressed = InputManager::keys_pressed[InputManager::controllers[0]];
@@ -85,7 +85,8 @@ void Match::updateMatch()
         {
             updateUpcomingPieces(pieces[i]);
             pieces[i]->just_solidified = false;
-            scores[boards[i]] += boards[i]->cleared_lines * 10 * std::get<int>(settings.velocity);
+            scores[pieces[i]] += 5 + ((std::get<int>(settings.velocity) - 1));
+            scores[pieces[i]] += pieces[i]->board->cleared_lines * 10 * std::get<int>(settings.velocity);
             total_lines_cleared[boards[i]] += boards[i]->cleared_lines;
             current_velocity_lines_cleared[boards[i]] += boards[i]->cleared_lines;
         }
@@ -107,11 +108,13 @@ void Match::updateMatch()
             break;
         case GameModes::MARATHON:
         {
-            showUpcomingPieces(pieces[0], pieces[0]->board->board_pos_x, pieces[0]->board->board_pos_y - 10, false, true);
+            showUpcomingPieces(pieces[0], pieces[0]->board->board_pos_x, pieces[0]->board->board_pos_y - 10, false, false);
+            showScore(pieces[0], pieces[0]->board->board_pos_x - 2, pieces[0]->board->board_pos_y - 2, true, true);
+            showHoldPiece(pieces[0], pieces[0]->board->board_pos_x + (SCREEN_HEIGHT / 2), pieces[0]->board->board_pos_y - 2, true, true);
             int& velocity = std::get<int>(settings.velocity);
             int& max_velocity = std::get<int>(settings.max_velocity);
-            printf("lines: %i", current_velocity_lines_cleared[boards[0]]);
-            printf("velocity: %i", velocity);
+            //printf("lines: %i", current_velocity_lines_cleared[boards[0]]);
+            //printf("velocity: %i", velocity);
             if(current_velocity_lines_cleared[boards[0]] > 20)
             {
                 if(velocity < max_velocity)
@@ -124,6 +127,10 @@ void Match::updateMatch()
                 {
                     gameWin();
                 }
+            }
+            if (pieces[0]->checkCollision() & COLLISION_DIRECTION::UP)
+            {
+                gameOver();
             }
             break;
         }
@@ -161,38 +168,49 @@ void Match::updateUpcomingPieces(Piece* piece)
     piece->next_piece = next_piece;
 }
 
-void Match::showUpcomingPieces(Piece* piece, int pos_x, int pos_y, bool vertical, bool show_text)
+void Match::showUpcomingPieces(Piece* piece, int pos_x, int pos_y, bool vertical_layout, bool show_text)
 {
-    
-if(vertical)
-    clearRegionOfScreen(tetrismatrix::hub75, 
-        pos_x * piece->scale, 
-        pos_y * piece->scale, 
-        (pos_x + 4) * piece->scale, 
-        (pos_y + 4 * (piece->upcoming_pieces.size() + 1)) * piece->scale, 
-        tetrismatrix::vertical);
-else
-    clearRegionOfScreen(tetrismatrix::hub75, 
-        pos_x * piece->scale, 
-        pos_y * piece->scale, 
-        (pos_x + 4 * (piece->upcoming_pieces.size() + 1)) * piece->scale, 
-        (pos_y + 4 + 2) * piece->scale, 
-        tetrismatrix::vertical);
+    std::string drawn_next_text = "";
 
     if(show_text)
     {
         Language current_language = (Language)std::get<EnumOption>(tetrismatrix::settings.current_language).value;
-        std::string drawn_next_text = translate(current_language, Texts::NEXT);
-        cropTextToFit(drawn_next_text, 3, 15);
-        draw4x3Text(tetrismatrix::hub75, tetrismatrix::graphics, drawn_next_text, pos_x - 1, pos_y - 1, 255, 255, 255, tetrismatrix::vertical);
+        drawn_next_text = translate(current_language, Texts::NEXT);
+        cropTextToFit(drawn_next_text, 3, 15);    
     }
+    else
+    {
+        pos_y -= 2 / piece->scale;
+    }
+    
+    if(vertical_layout)
+        clearRegionOfScreen(tetrismatrix::hub75, 
+            pos_x * piece->scale, 
+            pos_y * piece->scale, 
+            (pos_x + 4) * piece->scale, 
+            (pos_y + 4 * (piece->upcoming_pieces.size() + 1)) * piece->scale, 
+            tetrismatrix::vertical);
+    else
+        clearRegionOfScreen(tetrismatrix::hub75, 
+            (pos_x - 4) * piece->scale, 
+            pos_y * piece->scale, 
+            (pos_x + 4 * (piece->upcoming_pieces.size() + 1)) * piece->scale, 
+            (pos_y + 4 + 2) * piece->scale, 
+            tetrismatrix::vertical);
+
+    if(show_text)
+        draw4x3Text(tetrismatrix::hub75, tetrismatrix::graphics, drawn_next_text, pos_x - 1, pos_y - 1, 255, 255, 255, tetrismatrix::vertical);
+
 
     const int spacing = 2 * piece->scale;
+
+    if(!vertical_layout)
+        pos_x -= 4 / piece->scale;
     piece->printPiece(shapes[piece->next_piece], pos_x - piece->board->board_pos_x, pos_y - piece->board->board_pos_y, piece->scale);
     for(int i = 0; i < piece->upcoming_pieces.size(); i++)
     {
-        int piece_pos_x = vertical ? pos_x : pos_x + (spacing * (i + 1));
-        int piece_pos_y = vertical ? pos_y + (spacing * (i + 1)) : pos_y;
+        int piece_pos_x = vertical_layout ? pos_x : pos_x + (spacing * (i + 1));
+        int piece_pos_y = vertical_layout ? pos_y + (spacing * (i + 1)) : pos_y;
         piece->printPiece(shapes[piece->upcoming_pieces[i]], piece_pos_x - piece->board->board_pos_x, piece_pos_y - piece->board->board_pos_y, piece->scale);
     }
     
@@ -200,9 +218,99 @@ else
     
 }
 
+void Match::showScore(Piece* piece, int pos_x, int pos_y, bool vertical_layout, bool show_text)
+{
+    std::string drawn_score_text = "";
+    if(show_text)
+    {
+        Language current_language = (Language)std::get<EnumOption>(tetrismatrix::settings.current_language).value;
+        drawn_score_text = translate(current_language, Texts::SCORE);
+        cropTextToFit(drawn_score_text, 4, 20);
+    }
+    size_t score_length = std::to_string(scores[piece]).size();
+    size_t score_text_length = drawn_score_text.size();
+    int score_pos_x = vertical_layout ? pos_x + score_length: pos_x + (drawn_score_text.size() * 4) + (score_length - 1);
+    int score_pos_y = vertical_layout ? pos_y + 5 : pos_y;
+
+    if(vertical_layout)
+        clearRegionOfScreen(tetrismatrix::hub75, 
+            pos_x, 
+            pos_y + 4, 
+            pos_x + std::max(drawn_score_text.size(), score_length) * 4 + score_pos_x, 
+            pos_y + (4 * 2), 
+            tetrismatrix::vertical);
+    else
+        clearRegionOfScreen(tetrismatrix::hub75, 
+            score_pos_x, 
+            pos_y, 
+            score_pos_x + score_length, 
+            pos_y + 4, 
+            tetrismatrix::vertical);
+    if(show_text)
+        draw4x3Text(tetrismatrix::hub75, tetrismatrix::graphics, drawn_score_text, pos_x, pos_y, 255, 255, 255, tetrismatrix::vertical);
+    draw4x3Text(tetrismatrix::hub75, tetrismatrix::graphics, std::to_string(scores[piece]), score_pos_x, score_pos_y, 255, 255, 255, tetrismatrix::vertical);
+}
+
+void Match::showHoldPiece(Piece* piece, int pos_x, int pos_y, bool vertical_layout, bool show_text)
+{
+    std::string drawn_hold_text = "";
+
+    if(show_text)
+    {
+        Language current_language = (Language)std::get<EnumOption>(tetrismatrix::settings.current_language).value;
+        drawn_hold_text = translate(current_language, Texts::HOLD);
+        cropTextToFit(drawn_hold_text, 3, 15);
+        draw4x3Text(tetrismatrix::hub75, tetrismatrix::graphics, drawn_hold_text, pos_x - 1, pos_y - 1, 255, 255, 255, tetrismatrix::vertical);
+    }
+
+    int piece_pos_x = vertical_layout ? pos_x : pos_x + drawn_hold_text.size() * 3;
+    int piece_pos_y = vertical_layout ? pos_y + (2 * piece->scale) - 1 : pos_y;
+if(vertical_layout)
+    clearRegionOfScreen(tetrismatrix::hub75, 
+        pos_x, 
+        piece_pos_y, 
+        pos_x + (4 * piece->scale), 
+        piece_pos_y + (4 * piece->scale), 
+        tetrismatrix::vertical);
+else
+    clearRegionOfScreen(tetrismatrix::hub75, 
+        piece_pos_x, 
+        piece_pos_y, 
+        piece_pos_x + (4 * piece->scale), 
+        piece_pos_y + (4 * piece->scale), 
+        tetrismatrix::vertical);
+
+    piece->printPiece(shapes[piece->hold_piece], (piece_pos_x / piece->scale) - piece->board->board_pos_x, (piece_pos_y / piece->scale) - piece->board->board_pos_y, piece->scale);
+}
+
+
 void Match::gameOver()
 {
+    tetrismatrix::hub75.clear();
+    switch(game_mode)
+    {
+        case GameModes::MARATHON:
+            for(int i = 0; i < boards[0]->board_height; i++)
+            {
+                for(int j = 0; j < boards[0]->board_width; j++)
+                {
+                    if(boards[0]->board_matrix[i][j] == PIECES::NONE)
+                        continue;
+                    boards[0]->board_matrix[i][j] = PIECES::GHOST;
+                    boards[0]->updateBoard();
+                    sleep_ms(5);
+                }
+            }
 
+            break;
+    }
+    Language current_language = (Language)std::get<EnumOption>(tetrismatrix::settings.current_language).value;
+    draw5x5Text(tetrismatrix::hub75, tetrismatrix::graphics, translate(current_language, Texts::GAME_OVER), 20, 20, 255, 255, 255, tetrismatrix::vertical);
+    boards[0]->updateBoard();
+
+    sleep_ms(3000);
+    tetrismatrix::menus.push(createMenu(Menus::GAME_OVER));
+    ended = true;
 }
 
 void Match::gameWin()

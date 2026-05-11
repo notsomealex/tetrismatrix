@@ -29,8 +29,8 @@ else
 void Board::printBoard()
 {
 
-    printf("board_pos_x: %d, board_pos_y: %d\n", board_pos_x, board_pos_y);
-    printf("board_width: %d, board_height: %d, scale: %d\n", board_width, board_height, scale);
+    //printf("board_pos_x: %d, board_pos_y: %d\n", board_pos_x, board_pos_y);
+    //printf("board_width: %d, board_height: %d, scale: %d\n", board_width, board_height, scale);
     for (int i = 0; i < board_height; i++)
     {
         for (int j = 0; j < board_width; j++)

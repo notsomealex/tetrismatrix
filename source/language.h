@@ -43,7 +43,13 @@ enum class Texts
     NO,
     ENGLISH,
     SPANISH,
-    NEXT
+    NEXT,
+    SCORE,
+    HOLD,
+    GAME_OVER,
+    RETRY,
+    SAVE,
+    SAVED
 };
 using enum Texts;
 
@@ -86,7 +92,13 @@ inline Translations translations = {
             {SETTINGS, "SETTINGS"},
             {YES, "YES"},
             {NO, "NO"},
-            {NEXT, "NEXT"}
+            {NEXT, "NEXT"},
+            {SCORE, "SCORE"},
+            {HOLD, "HOLD"},
+            {GAME_OVER, "GAME OVER"},
+            {RETRY, "RETRY"},
+            {SAVE, "SAVE"},
+            {SAVED, "SAVED"}
         }
     },
     {
@@ -124,7 +136,13 @@ inline Translations translations = {
             {SETTINGS, "CONFIGURACIONES"},
             {YES, "SI"},
             {NO, "NO"},
-            {NEXT, "SIGUIENTE"}
+            {NEXT, "SIGUIENTE"},
+            {SCORE, "PUNTIACION"},
+            {HOLD, "GUARDAR"},
+            {GAME_OVER, "FIN DEL JUEGO"},
+            {RETRY, "REINTENTAR"},
+            {SAVE, "GUARDAR"},
+            {SAVED, "GUARDADO"}
         }
     },
 };

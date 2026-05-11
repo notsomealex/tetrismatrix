@@ -4,6 +4,7 @@
 #include "language.h"
 #include "helpers.h"
 #include "inputmanager.h"
+#include "databasemanager.h"
 
 bool tetrismatrix::debug = true;
 Match *tetrismatrix::current_match = nullptr;
@@ -29,6 +30,9 @@ void tetrismatrix::initGame()
     hub75.start(dma_complete);
     printf("hub75 started\n");
 
+    // FOR NOW COMPLETELY BROKEN. better implement this in the cloud smh
+    //DatabaseManager::init();
+        
     if (!InputManager::init())
     {
         while (1)
@@ -43,9 +47,9 @@ void tetrismatrix::initGame()
     Menu* main_menu = createMenu(Menus::MAIN_MENU);
     menus.push(main_menu);
 
-    
+    //DatabaseManager::close();
 
-    // newMatch();
+    
 }
 
 void tetrismatrix::endMatch()
@@ -66,7 +70,6 @@ void tetrismatrix::newMatch()
 void tetrismatrix::updateGame()
 {
     // printf("updating game!!\n\n");
-
     
   
 
@@ -169,6 +172,28 @@ Menu* tetrismatrix::createMenu(Menus menu_type)
                     (OptionValue*)&settings.current_language,
                     0,
                     (int)Language::SIZE - 1,
+                    true),
+
+                    Menu::Option(
+                    translate(current_language, Texts::SAVE),
+                    [current_language]()
+                    {
+                        hub75.clear();
+                        std::string saved_text = translate(current_language, Texts::SAVED) + "!";
+                        draw4x3Text(hub75, graphics, saved_text, 1, 10, 255, 255, 255, tetrismatrix::vertical);
+                        /*
+                        hub75.stop(dma_complete);
+                        DatabaseManager::saveOrUpdateGameSettings(
+                            std::get<int>(settings.volume_music),
+                            std::get<int>(settings.volume_sfx),
+                            current_language
+                        );
+                        sqlite3_exec(DatabaseManager::database, "PRAGMA wal_checkpoint(FULL);", nullptr, nullptr, nullptr);
+                        hub75.start(dma_complete);
+                        */
+                        sleep_ms(1000);
+                        InputManager::clearAllInputs();
+                    },
                     true),
             }
         };
@@ -342,6 +367,24 @@ Menu* tetrismatrix::createMenu(Menus menu_type)
             title = translate(current_language, Texts::SETTINGS);
     
             break;
+            case Menus::GAME_OVER:
+                options = {
+            {
+                Menu::Option(
+                    translate(current_language, Texts::RETRY),
+                    []()
+                    { menus.pop(); menus.push(createMenu(Menus::MATCH_SETTINGS)); InputManager::clearAllInputs();},
+                    true),
+
+                Menu::Option(
+                    translate(current_language, Texts::EXIT),
+                    []()
+                    {if(current_match != nullptr) delete current_match; current_match = nullptr; menus.pop(); menus.top()->hide_menu = false; InputManager::clearAllInputs(); if(!tetrismatrix::vertical) tetrismatrix::vertical = true; InputManager::clearAllInputs();}, 
+                    true)
+            }
+        };
+            title = translate(current_language, Texts::GAME_OVER);
+                break;
     }
 
 
@@ -358,8 +401,7 @@ Menu* tetrismatrix::createMenu(Menus menu_type)
             };
             break;
         case Menus::OPTIONS:
-            menu->options[2].on_click = [](){past_language = (Language)std::get<EnumOption>(settings.current_language).value;
-};
+            menu->options[2].on_click = [](){past_language = (Language)std::get<EnumOption>(settings.current_language).value;};
             break;
         case Menus::SCORES:
             break;
@@ -386,7 +428,20 @@ Menu* tetrismatrix::createMenu(Menus menu_type)
             case Menus::GAME_MODE_SELECTION:
                 menu->callback = [](){};
                 break;
-        break;
+            case Menus::GAME_OVER:
+                menu->callback = [menu](){
+                if(InputManager::keys_pressed[InputManager::controllers[0]] & KEY_START)
+                {
+                    menu->selected_index = 0;
+                    menu->executeSelectedOption();
+                }
+                if(InputManager::keys_pressed[InputManager::controllers[0]] & KEY_B)
+                {
+                    menu->selected_index = 1;
+                    menu->executeSelectedOption();
+                }
+            };
+                break;
     }
     menu->menu_type = menu_type;
     return menu;
