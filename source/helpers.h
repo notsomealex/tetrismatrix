@@ -175,12 +175,23 @@ inline void draw4x3Text(Hub75& hub75, PicoGraphics_PenRGB888& graphics, const st
 inline void drawScrollingText(Hub75& hub75, PicoGraphics_PenRGB888& graphics, const std::string& text, int x, int y, int r, int g, int b, bool vertical, int frames_to_scroll, int& new_pos_x, int frames, int font_width,
     void(*drawing_function)(Hub75& hub75, PicoGraphics_PenRGB888& graphics, const std::string& text, int x, int y, int r, int g, int b, bool vertical))
 {
-    const int initial_offset = 5;
+    const int initial_offset = 10;
 
-    if(new_pos_x < (x - ((int)text.size() * font_width)))
+        std::stringstream ss(text);
+        std::string word;
+        std::vector<std::string> text_words;
+
+        while (ss >> word) 
+        {
+            text_words.push_back(word);
+        }
+        std::string shortest_word = *std::max_element(text_words.begin(), text_words.end());
+
+
+    if(new_pos_x < (x - ((int)shortest_word.size() * font_width)) - initial_offset)
     {
         new_pos_x += (vertical) ? (SCREEN_HEIGHT) : (SCREEN_WIDTH);
-        new_pos_x += + ((int)text.size() * font_width);
+        new_pos_x += ((int)shortest_word.size() * font_width) + initial_offset;
     }
         
 
