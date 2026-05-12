@@ -77,6 +77,7 @@ void Match::updateMatch()
     for(int i = 0; i < boards.size(); i++)
     {
         boards[i]->updateBoard();
+        
     }
 
     for(int i = 0; i < pieces.size(); i++)
@@ -89,6 +90,25 @@ void Match::updateMatch()
             scores[pieces[i]] += pieces[i]->board->cleared_lines * 10 * std::get<int>(settings.velocity);
             total_lines_cleared[boards[i]] += boards[i]->cleared_lines;
             current_velocity_lines_cleared[boards[i]] += boards[i]->cleared_lines;
+
+            if(pieces[i]->board->cleared_lines > 0)
+            {
+                switch (pieces[i]->board->cleared_lines)
+                {
+                    case 1:
+                        singles_amount[pieces[i]->board]++;
+                        break;
+                    case 2:
+                        doubles_amount[pieces[i]->board]++;
+                        break;
+                    case 3:
+                        triples_amount[pieces[i]->board]++;
+                        break;
+                    case 4:
+                        tetris_amount[pieces[i]->board]++;
+                        break;
+                }
+            }
         }
         pieces[i]->updatePiece();
     }
@@ -332,8 +352,96 @@ void Match::gameOver()
 
 void Match::gameWin()
 {
+    ended = true;
+    Language current_language = (Language)std::get<EnumOption>(tetrismatrix::settings.current_language).value;
+
+    switch(game_mode)
+    {
+        case GameModes::MARATHON:
+            std::string gg_text = translate(current_language, Texts::GG) + "!!!";
+            draw5x5Text(tetrismatrix::hub75, tetrismatrix::graphics, gg_text, 20, 20, 255, 255, 255, tetrismatrix::vertical);
+            boards[0]->updateBoard();
+            break;
+    }
+    sleep_ms(3000);
+    switch(game_mode)
+    {
+        case GameModes::MARATHON:
+        std::vector<Menu::Option> options = 
+        {
+            Menu::Option(translate(current_language, Texts::ENTER_YOUR_NAME),
+                [](){InputManager::clearAllInputs();},
+                &name,
+                10,
+                10,
+                true
+            )
+        };
+        tetrismatrix::menus.push(new Menu(options));
+        tetrismatrix::menus.top()->callback = [this](){tetrismatrix::menus.pop(); tetrismatrix::menus.push(createMenu(Menus::GAME_OVER)); showResults();};
+        tetrismatrix::menus.top()->executeSelectedOption();
+        break;
+    }
+
 
 }
+
+// yeah i made it a separate function. deal with itttt
+void Match::versusOver(Piece* winner)
+{
+
+}
+
+void Match::showResults()
+{
+    std::vector<Menu::Option> options;
+    Language current_language = (Language)std::get<EnumOption>(tetrismatrix::settings.current_language).value;
+
+    switch(game_mode)
+    {
+        case GameModes::MARATHON:
+        options =
+        {
+            Menu::Option(translate(current_language, Texts::NAME) + ": " + std::get<std::string>(name), // AGAIN, NAME IS PLACEHOLDER.
+                [](){},
+                true
+            ),
+            Menu::Option(translate(current_language, Texts::SCORE) + ": " + std::to_string(scores[pieces[0]]),
+                [](){},
+                true
+            ),
+            Menu::Option(translate(current_language, Texts::LINES_CLEARED) + ": " + std::to_string(total_lines_cleared[boards[0]]),
+                [](){},
+                true
+            ),
+            Menu::Option(translate(current_language, Texts::SINGLE) + "S: " + std::to_string(singles_amount[boards[0]]),
+                [](){},
+                true
+            ),
+            Menu::Option(translate(current_language, Texts::DOUBLE) + "S: " + std::to_string(doubles_amount[boards[0]]),
+                [](){},
+                true
+            ),
+            Menu::Option(translate(current_language, Texts::TRIPLE) + "S: " + std::to_string(triples_amount[boards[0]]),
+                [](){},
+                true
+            ),
+            Menu::Option(translate(current_language, Texts::TETRIS) + ": " + std::to_string(tetris_amount[boards[0]]),
+                [](){},
+                true
+            ),
+        };
+        break;
+    }
+    tetrismatrix::menus.push(new Menu(translate(current_language, Texts::RESULTS), options,
+        []()
+        { 
+            if(InputManager::keys_pressed[InputManager::controllers[0]] & KEY_A)
+                InputManager::keys_pressed[InputManager::controllers[0]] |= KEY_B;
+        }));
+
+}
+
 
 
 

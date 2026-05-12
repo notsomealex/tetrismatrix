@@ -117,6 +117,11 @@ public:
     std::unordered_map<Board*, int> total_lines_cleared;
     std::unordered_map<Board*, int> current_velocity_lines_cleared;
 
+    std::unordered_map<Board*, int> singles_amount;
+    std::unordered_map<Board*, int> doubles_amount;
+    std::unordered_map<Board*, int> triples_amount;
+    std::unordered_map<Board*, int> tetris_amount;
+
     OptionValue name = ""; // PLACEHOLDER later actually save this name to the db.
 
     
@@ -135,6 +140,8 @@ public:
     void showHoldPiece(Piece* piece, int pos_x, int pos_y, bool vertical_layout, bool show_text);
     void gameOver();
     void gameWin();
+    void versusOver(Piece* winner);
+    void showResults();
     Match();
     Match(MatchSettings settings, GameModes game_mode);
     ~Match();

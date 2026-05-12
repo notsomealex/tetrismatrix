@@ -12,6 +12,7 @@ if (EXISTS ${picoVscode})
     include(${picoVscode})
 endif()
 # ====================================================================================
+
 cmake_minimum_required(VERSION 3.13)
 
 set(CMAKE_C_STANDARD 11)
@@ -43,7 +44,9 @@ include(pico_sdk_import.cmake)
 project(tetrismatrix C CXX ASM)
 
 
+
 pico_sdk_init()
+
 
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/source)
 
@@ -58,7 +61,11 @@ add_subdirectory(${BLUEPAD32_ROOT}/src/components/bluepad32 libbluepad32)
 include_directories(${CMAKE_SOURCE_DIR}/utilities/hub75)
 add_subdirectory(utilities/hub75/libraries/pico_graphics)
 add_subdirectory(utilities/hub75)
+add_subdirectory(utilities/pico-sqlite)
+
 add_subdirectory(source)
+
+pico_enable_filesystem(tetrismatrix AUTO_INIT TRUE)
 
 # optimizations to make binary size smaller.
 target_compile_options(tetrismatrix PRIVATE -Os)

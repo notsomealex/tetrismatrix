@@ -50,7 +50,15 @@ enum class Texts
     RETRY,
     SAVE,
     SAVED,
-    ENTER_YOUR_NAME
+    ENTER_YOUR_NAME,
+    GG,
+    RESULTS,
+    NAME,
+    LINES_CLEARED,
+    SINGLE,
+    DOUBLE,
+    TRIPLE,
+    TETRIS
 };
 using enum Texts;
 
@@ -100,7 +108,15 @@ inline Translations translations = {
             {RETRY, "RETRY"},
             {SAVE, "SAVE"},
             {SAVED, "SAVED"},
-            {ENTER_YOUR_NAME, "ENTER YOUR NAME"}
+            {ENTER_YOUR_NAME, "ENTER YOUR NAME"},
+            {GG, "GG"},
+            {RESULTS, "RESULTS"},
+            {NAME, "NAME"},
+            {LINES_CLEARED, "LINES CLEARED"},
+            {SINGLE, "SINGLE"},
+            {DOUBLE, "DOUBLE"},
+            {TRIPLE, "TRIPLE"},
+            {TETRIS, "TETRIS"}
         }
     },
     {
@@ -145,7 +161,17 @@ inline Translations translations = {
             {RETRY, "REINTENTAR"},
             {SAVE, "GUARDAR"},
             {SAVED, "GUARDADO"},
-            {ENTER_YOUR_NAME, "INTRODUCE TU NOMBRE"}
+            {ENTER_YOUR_NAME, "INTRODUCE TU NOMBRE"},
+            {GG, "GG"},
+            {RESULTS, "RESULTADOS"},
+            {NAME, "NOMBRE"},
+            {LINES_CLEARED, "LINEAS HECHAS"},
+            {SINGLE, "SINGLE"},
+            {DOUBLE, "DOBLE"},
+            {TRIPLE, "TRIPLE"},
+            {TETRIS, "TETRIS"}
+
+            
         }
     },
 };

@@ -52,21 +52,6 @@ void tetrismatrix::initGame()
     
 }
 
-void tetrismatrix::endMatch()
-{
-    if (current_match != nullptr)
-    {
-        delete current_match;
-        current_match = nullptr;
-    }
-}
-
-void tetrismatrix::newMatch()
-{
-    if (current_match == nullptr)
-        current_match = new Match();
-}
-
 void tetrismatrix::updateGame()
 {
     // printf("updating game!!\n\n");
@@ -373,7 +358,7 @@ Menu* tetrismatrix::createMenu(Menus menu_type)
                 Menu::Option(
                     translate(current_language, Texts::RETRY),
                     []()
-                    { menus.pop(); menus.push(createMenu(Menus::MATCH_SETTINGS)); InputManager::clearAllInputs();},
+                    {menus.push(createMenu(Menus::MATCH_SETTINGS)); InputManager::clearAllInputs();},
                     true),
 
                 Menu::Option(
@@ -385,6 +370,7 @@ Menu* tetrismatrix::createMenu(Menus menu_type)
         };
             title = translate(current_language, Texts::GAME_OVER);
                 break;
+
     }
 
 

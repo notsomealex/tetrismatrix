@@ -84,8 +84,6 @@ namespace tetrismatrix
     
     void initGame();
     void updateGame();
-    void newMatch();
-    void endMatch();
 
     int screenWidth();
     int screenHeight();
