@@ -27,6 +27,7 @@ class Menu
     std::array<uint8_t, 3> title_color = {255, 255, 255};
     std::vector<Option> options;
     std::function<void()> callback;
+    std::function<void()> on_close;
     bool selection_changed = false;
     int selected_index = 0;
     int scale = 2;
@@ -43,5 +44,7 @@ class Menu
     void modifySelectedOptionValue();
 
     Menu(std::string title, std::vector<Option> options, std::function<void()> callback);
+    Menu(std::string title, std::vector<Option> options, std::function<void()> callback, std::function<void()> on_close);
+
     Menu(std::vector<Option> options);
 };

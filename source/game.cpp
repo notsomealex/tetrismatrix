@@ -190,7 +190,6 @@ Menu* tetrismatrix::createMenu(Menus menu_type)
 
         case Menus::PAUSE:
             options = {
-                // APPARENTLY it is only needed to clear the screen here. dk why
                 Menu::Option(
                 translate(current_language, Texts::RESUME),
                 []()
@@ -200,7 +199,18 @@ Menu* tetrismatrix::createMenu(Menus menu_type)
                 Menu::Option(
                 translate(current_language, Texts::EXIT),
                 []()
-                { if(current_match != nullptr) delete current_match; current_match = nullptr; popMenu(); menus.top()->hide_menu = false; InputManager::clearAllInputs(); if(!tetrismatrix::vertical) tetrismatrix::vertical = true;},
+                { 
+                    if(current_match != nullptr) 
+                        delete current_match; 
+                    current_match = nullptr; 
+                    popMenu(); 
+                    menus.top()->hide_menu = false; 
+                    InputManager::clearAllInputs(); 
+                    if(!tetrismatrix::vertical) 
+                        tetrismatrix::vertical = true;
+                    
+                    
+                },
                 true)
             };
             title = translate(current_language, PAUSE);
@@ -313,6 +323,7 @@ Menu* tetrismatrix::createMenu(Menus menu_type)
             }
                     
 
+            /*
             if(selected_game_mode == GameModes::MARATHON)
                 options.push_back(Menu::Option(
                     translate(current_language, Texts::MAX_VELOCITY),
@@ -322,6 +333,7 @@ Menu* tetrismatrix::createMenu(Menus menu_type)
                     2,
                     15,
                     true));
+            */
 
             if(selected_game_mode == GameModes::VERSUS)
                 {
@@ -358,13 +370,23 @@ Menu* tetrismatrix::createMenu(Menus menu_type)
                 Menu::Option(
                     translate(current_language, Texts::RETRY),
                     []()
-                    {if(current_match != nullptr) delete current_match; menus.push(createMenu(Menus::MATCH_SETTINGS)); InputManager::clearAllInputs();},
+                    {if(current_match != nullptr) delete current_match; current_match = nullptr; menus.push(createMenu(Menus::MATCH_SETTINGS)); InputManager::clearAllInputs();},
                     true),
 
                 Menu::Option(
                     translate(current_language, Texts::EXIT),
+                    // IDEALLY i'd like this to not make it go back to the main menu, but meh for now it will stick.
                     []()
-                    {if(current_match != nullptr) delete current_match; current_match = nullptr; popMenu(); menus.top()->hide_menu = false; InputManager::clearAllInputs(); if(!tetrismatrix::vertical) tetrismatrix::vertical = true; InputManager::clearAllInputs();}, 
+                    {
+                        if(current_match != nullptr) delete current_match; 
+                            current_match = nullptr;
+                        while(menus.size() > 1)
+                            popMenu();
+                        menus.top()->hide_menu = false; 
+                        InputManager::clearAllInputs(); 
+                        if(!tetrismatrix::vertical) 
+                            tetrismatrix::vertical = true;
+                    }, 
                     true)
             }
         };
@@ -439,7 +461,9 @@ inline void tetrismatrix::popMenu()
     if(menus.top() != nullptr)
        delete menus.top();
        
+    printf("size before pop: %i", menus.size());
     menus.pop();
+    printf("size after pop: %i", menus.size());
 }
 
 int tetrismatrix::screenWidth()

@@ -20,7 +20,7 @@ public:
     int scale = 1;
 
     void initBoard();
-    void printBoard();
+    void printBoard(bool print_empty_blocks);
     void updateBoard();
     int leftTileLimit();
     int rightTileLimit();

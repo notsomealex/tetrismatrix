@@ -26,7 +26,7 @@ else
 
 }
 
-void Board::printBoard()
+void Board::printBoard(bool print_empty_blocks)
 {
 
     //printf("board_pos_x: %d, board_pos_y: %d\n", board_pos_x, board_pos_y);
@@ -36,6 +36,9 @@ void Board::printBoard()
         for (int j = 0; j < board_width; j++)
         {
             const PIECES current_block = (PIECES)board_matrix[i][j];
+            if(!print_empty_blocks && current_block == NONE)
+                continue;
+
             int x = vertical ? ((i + board_pos_y) * scale) : ((j + board_pos_x) * scale);
             // i dont like that i have to do this hack so that it doesnt show mirrored but mehhhhhhh
             int y = vertical ? ((board_width - 1 - j + board_pos_x) * scale) : ((i + + board_pos_y) * scale);
@@ -62,7 +65,7 @@ void Board::printBoard()
 
 void Board::updateBoard()
 {
-    printBoard();
+    printBoard(true);
 }
 
 int Board::leftTileLimit()

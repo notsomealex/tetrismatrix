@@ -58,7 +58,8 @@ enum class Texts
     SINGLE,
     DOUBLE,
     TRIPLE,
-    TETRIS
+    TETRIS,
+    PLAYER
 };
 using enum Texts;
 
@@ -116,7 +117,8 @@ inline Translations translations = {
             {SINGLE, "SINGLE"},
             {DOUBLE, "DOUBLE"},
             {TRIPLE, "TRIPLE"},
-            {TETRIS, "TETRIS"}
+            {TETRIS, "TETRIS"},
+            {PLAYER, "PLAYER"}
         }
     },
     {
@@ -155,7 +157,7 @@ inline Translations translations = {
             {YES, "SI"},
             {NO, "NO"},
             {NEXT, "SIGUIENTE"},
-            {SCORE, "PUNTIACION"},
+            {SCORE, "PUNTUACION"},
             {HOLD, "GUARDAR"},
             {GAME_OVER, "FIN DEL JUEGO"},
             {RETRY, "REINTENTAR"},
@@ -169,7 +171,8 @@ inline Translations translations = {
             {SINGLE, "SINGLE"},
             {DOUBLE, "DOBLE"},
             {TRIPLE, "TRIPLE"},
-            {TETRIS, "TETRIS"}
+            {TETRIS, "TETRIS"},
+            {PLAYER, "JUGADOR"}
 
             
         }

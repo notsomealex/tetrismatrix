@@ -5,6 +5,7 @@
 #include "helpers.h"
 #include "language.h"
 #include "inputmanager.h"
+
 void Match::initMatch()
 {
     srand(to_ms_since_boot(get_absolute_time()));
@@ -150,7 +151,7 @@ void Match::updateMatch()
             }
             if (pieces[0]->checkCollision() & COLLISION_DIRECTION::UP)
             {
-                gameOver();
+                gameWin();
             }
             break;
         }
@@ -159,6 +160,9 @@ void Match::updateMatch()
                 InputManager::searchForControllers();
             showUpcomingPieces(pieces[0], pieces[0]->board->board_pos_x - 5, pieces[0]->board->board_pos_y, true, false);
             showUpcomingPieces(pieces[1], pieces[1]->board->board_pos_x + (pieces[1]->board->board_width) + 1, pieces[1]->board->board_pos_y, true, false);
+
+            if(pieces[0]->checkCollision() & COLLISION_DIRECTION::UP || pieces[1]->checkCollision() & COLLISION_DIRECTION::UP)
+                gameOver();
             break;
         case GameModes::COOP:
             while(InputManager::controllers.size() != 2)
@@ -327,13 +331,60 @@ void Match::gameOver()
             draw5x5Text(tetrismatrix::hub75, tetrismatrix::graphics, translate(current_language, Texts::GAME_OVER), 20, 20, 255, 255, 255, tetrismatrix::vertical);
             boards[0]->updateBoard();
             break;
+
+        case GameModes::VERSUS:
+            int gg_pos_x;
+            int gg_pos_y = 10;
+            Board* loser_board;
+            Board* winner_board;
+            std::string gg_text = translate(current_language, Texts::GG) + "!!!";
+            pieces[0]->updatePiece();
+            pieces[1]->updatePiece();
+
+            if(pieces[0]->checkCollision() & COLLISION_DIRECTION::UP)
+            {
+                loser_board = pieces[0]->board;
+                winner_board = pieces[1]->board;
+                gg_pos_x = (pieces[1]->board->board_pos_x) * pieces[1]->scale + 1;
+            }
+            else
+            {
+                loser_board = pieces[1]->board;
+                winner_board = pieces[0]->board;
+                gg_pos_x = (pieces[0]->board->board_width / 2) * pieces[0]->scale + 1;
+            }
+            printf("\n\n\ngg_pos_x: %i", gg_pos_x);
+            for(int i = 0; i < loser_board->board_height; i++)
+            {
+                for(int j = 0; j < loser_board->board_width; j++)
+                {
+                    winner_board->board_matrix[i][j] = PIECES::NONE;
+                    if(loser_board->board_matrix[i][j] == PIECES::NONE)
+                        continue;
+                    loser_board->board_matrix[i][j] = PIECES::GHOST;
+                    loser_board->updateBoard();
+                    winner_board->updateBoard();
+                    sleep_ms(5);
+                }
+            }
+            tetrismatrix::graphics.set_pen(0, 0, 0);
+            tetrismatrix::graphics.clear();
+            tetrismatrix::graphics.set_pen(255, 255, 255);
+            tetrismatrix::graphics.text(gg_text, Point(gg_pos_x, gg_pos_y), 1, 1.0f, 0.0f);
+            tetrismatrix::hub75.update(&graphics);
+
+            pieces[0]->board->printBoard(false);
+            pieces[1]->board->printBoard(false);
+            break;
+            
     }
 
     sleep_ms(3000);
+    std::vector<Menu::Option> options;
     switch(game_mode)
     {
         case GameModes::MARATHON:
-        std::vector<Menu::Option> options = 
+        options = 
         {
             Menu::Option(translate(current_language, Texts::ENTER_YOUR_NAME),
                 [](){InputManager::clearAllInputs();},
@@ -344,30 +395,57 @@ void Match::gameOver()
             )
         };
         tetrismatrix::menus.push(new Menu(options));
-        tetrismatrix::menus.top()->callback = [](){tetrismatrix::popMenu(); tetrismatrix::menus.push(createMenu(Menus::GAME_OVER));};
         tetrismatrix::menus.top()->executeSelectedOption();
+        tetrismatrix::menus.top()->on_close = [](){tetrismatrix::popMenu(); tetrismatrix::popMenu(); tetrismatrix::menus.push(createMenu(Menus::GAME_OVER)); InputManager::clearAllInputs();};
+
+        break;
+
+        case GameModes::VERSUS:
+        options = 
+        {
+            Menu::Option(
+                translate(current_language, Texts::PLAYER) + "2: " + translate(current_language, Texts::ENTER_YOUR_NAME),
+                [](){InputManager::clearAllInputs();},
+                &name,
+                10,
+                10,
+                true
+            )
+        };
+        tetrismatrix::vertical = true;
+        tetrismatrix::menus.push(new Menu(options));
+        tetrismatrix::menus.top()->executeSelectedOption();
+        tetrismatrix::menus.top()->on_close = [this](){ tetrismatrix::menus.push(createMenu(Menus::GAME_OVER)); showResults(pieces[1]);};
+
+
+        options[0].name = translate(current_language, Texts::PLAYER) + "1: " + translate(current_language, Texts::ENTER_YOUR_NAME);
+        tetrismatrix::menus.push(new Menu(options));
+        tetrismatrix::menus.top()->executeSelectedOption();
+        tetrismatrix::menus.top()->on_close = [this](){ tetrismatrix::popMenu(); tetrismatrix::popMenu(); showResults(pieces[0]);};
+
         break;
     }
 }
-
+// default ending function for versus, no matter who loses or wins. yeahhhhhh
 void Match::gameWin()
 {
     ended = true;
     Language current_language = (Language)std::get<EnumOption>(tetrismatrix::settings.current_language).value;
+    std::string gg_text = translate(current_language, Texts::GG) + "!!!";
 
     switch(game_mode)
     {
         case GameModes::MARATHON:
-            std::string gg_text = translate(current_language, Texts::GG) + "!!!";
             draw5x5Text(tetrismatrix::hub75, tetrismatrix::graphics, gg_text, 20, 20, 255, 255, 255, tetrismatrix::vertical);
             boards[0]->updateBoard();
             break;
     }
     sleep_ms(3000);
+    std::vector<Menu::Option> options;
     switch(game_mode)
     {
         case GameModes::MARATHON:
-        std::vector<Menu::Option> options = 
+        options = 
         {
             Menu::Option(translate(current_language, Texts::ENTER_YOUR_NAME),
                 [](){InputManager::clearAllInputs();},
@@ -378,66 +456,62 @@ void Match::gameWin()
             )
         };
         tetrismatrix::menus.push(new Menu(options));
-        tetrismatrix::menus.top()->callback = [](){tetrismatrix::popMenu(); tetrismatrix::menus.push(createMenu(Menus::GAME_OVER)); current_match->showResults();};
         tetrismatrix::menus.top()->executeSelectedOption();
+        tetrismatrix::menus.top()->on_close = [this](){tetrismatrix::popMenu(); tetrismatrix::menus.push(createMenu(Menus::GAME_OVER));}; // why the fuck does this crash ughggggggg
+
         break;
+
+        case GameModes::VERSUS:
+            // this case is at the gameOver function.
+            break;
     }
 
 
 }
 
-// yeah i made it a separate function. deal with itttt
-void Match::versusOver(Piece* winner)
-{
+// i dont really like that much that the piece represents the player but yeah sorry:/
+void Match::showResults(Piece* player_piece)
+{ 
 
-}
-
-void Match::showResults()
-{
-    std::vector<Menu::Option> options;
     Language current_language = (Language)std::get<EnumOption>(tetrismatrix::settings.current_language).value;
 
-    switch(game_mode)
-    {
-        case GameModes::MARATHON:
-        options =
+        std::vector<Menu::Option> options =
         {
             Menu::Option(translate(current_language, Texts::NAME) + ": " + std::get<std::string>(name), // AGAIN, NAME IS PLACEHOLDER.
                 [](){},
                 true
             ),
-            Menu::Option(translate(current_language, Texts::SCORE) + ": " + std::to_string(scores[pieces[0]]),
+            Menu::Option(translate(current_language, Texts::SCORE) + ": " + std::to_string(scores[player_piece]),
                 [](){},
                 true
             ),
-            Menu::Option(translate(current_language, Texts::LINES_CLEARED) + ": " + std::to_string(total_lines_cleared[boards[0]]),
+            Menu::Option(translate(current_language, Texts::LINES_CLEARED) + ": " + std::to_string(total_lines_cleared[player_piece->board]),
                 [](){},
                 true
             ),
-            Menu::Option(translate(current_language, Texts::SINGLE) + "S: " + std::to_string(singles_amount[boards[0]]),
+            Menu::Option(translate(current_language, Texts::SINGLE) + "S: " + std::to_string(singles_amount[player_piece->board]),
                 [](){},
                 true
             ),
-            Menu::Option(translate(current_language, Texts::DOUBLE) + "S: " + std::to_string(doubles_amount[boards[0]]),
+            Menu::Option(translate(current_language, Texts::DOUBLE) + "S: " + std::to_string(doubles_amount[player_piece->board]),
                 [](){},
                 true
             ),
-            Menu::Option(translate(current_language, Texts::TRIPLE) + "S: " + std::to_string(triples_amount[boards[0]]),
+            Menu::Option(translate(current_language, Texts::TRIPLE) + "S: " + std::to_string(triples_amount[player_piece->board]),
                 [](){},
                 true
             ),
-            Menu::Option(translate(current_language, Texts::TETRIS) + ": " + std::to_string(tetris_amount[boards[0]]),
+            Menu::Option(translate(current_language, Texts::TETRIS) + ": " + std::to_string(tetris_amount[player_piece->board]),
                 [](){},
                 true
             ),
         };
-        break;
-    }
+    
     tetrismatrix::menus.push(new Menu(translate(current_language, Texts::RESULTS), options,
-        []()
+        [player_piece]()
         { 
-            if(InputManager::keys_pressed[InputManager::controllers[0]] & KEY_A)
-                InputManager::keys_pressed[InputManager::controllers[0]] |= KEY_B;
+            if(InputManager::keys_pressed[player_piece->controller] & KEY_A)
+                InputManager::keys_pressed[player_piece->controller] |= KEY_B;
         }));
 
 }

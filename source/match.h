@@ -141,7 +141,7 @@ public:
     void gameOver();
     void gameWin();
     void versusOver(Piece* winner);
-    void showResults();
+    void showResults(Piece* player_piece);
     Match();
     Match(MatchSettings settings, GameModes game_mode);
     ~Match();
