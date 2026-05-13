@@ -151,7 +151,7 @@ void Match::updateMatch()
             }
             if (pieces[0]->checkCollision() & COLLISION_DIRECTION::UP)
             {
-                gameWin();
+                gameOver();
             }
             break;
         }
@@ -457,7 +457,7 @@ void Match::gameWin()
         };
         tetrismatrix::menus.push(new Menu(options));
         tetrismatrix::menus.top()->executeSelectedOption();
-        tetrismatrix::menus.top()->on_close = [this](){tetrismatrix::popMenu(); tetrismatrix::menus.push(createMenu(Menus::GAME_OVER));}; // why the fuck does this crash ughggggggg
+        tetrismatrix::menus.top()->on_close = [this](){tetrismatrix::popMenu(); tetrismatrix::menus.push(createMenu(Menus::GAME_OVER)); InputManager::clearAllInputs();}; // FIXED OMFG
 
         break;
 
