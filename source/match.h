@@ -55,7 +55,7 @@ inline std::unordered_map<GameModes, MatchSettings> default_settings
             .velocity = 1,
             .lock_delay = 60, 
 
-            .max_velocity = 10,
+            .max_velocity = 15,
         }
     },
     {
@@ -68,7 +68,7 @@ inline std::unordered_map<GameModes, MatchSettings> default_settings
             .velocity = 1,
             .lock_delay = 60, 
 
-            .max_velocity = 10,
+            .max_velocity = 15,
 
             .garbage_multiplier = 1,
             .garbage_blocking = 1
@@ -84,7 +84,7 @@ inline std::unordered_map<GameModes, MatchSettings> default_settings
             .velocity = 1,
             .lock_delay = 60, 
 
-            .max_velocity = 10,
+            .max_velocity = 15,
         }
     },
     {
@@ -97,7 +97,7 @@ inline std::unordered_map<GameModes, MatchSettings> default_settings
             .velocity = 1,
             .lock_delay = 60, 
 
-            .max_velocity = 10,
+            .max_velocity = 15,
         }
     }
 

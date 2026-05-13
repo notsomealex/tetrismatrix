@@ -283,7 +283,7 @@ void Match::showHoldPiece(Piece* piece, int pos_x, int pos_y, bool vertical_layo
         draw4x3Text(tetrismatrix::hub75, tetrismatrix::graphics, drawn_hold_text, pos_x - 1, pos_y - 1, 255, 255, 255, tetrismatrix::vertical);
     }
 
-    int piece_pos_x = vertical_layout ? pos_x : pos_x + drawn_hold_text.size() * 3;
+    int piece_pos_x = vertical_layout ? pos_x + 2 : pos_x + drawn_hold_text.size() * 3;
     int piece_pos_y = vertical_layout ? pos_y + (2 * piece->scale) - 1 : pos_y;
 if(vertical_layout)
     clearRegionOfScreen(tetrismatrix::hub75, 
@@ -344,7 +344,7 @@ void Match::gameOver()
             )
         };
         tetrismatrix::menus.push(new Menu(options));
-        tetrismatrix::menus.top()->callback = [](){tetrismatrix::menus.pop(); tetrismatrix::menus.push(createMenu(Menus::GAME_OVER));};
+        tetrismatrix::menus.top()->callback = [](){tetrismatrix::popMenu(); tetrismatrix::menus.push(createMenu(Menus::GAME_OVER));};
         tetrismatrix::menus.top()->executeSelectedOption();
         break;
     }
@@ -378,7 +378,7 @@ void Match::gameWin()
             )
         };
         tetrismatrix::menus.push(new Menu(options));
-        tetrismatrix::menus.top()->callback = [this](){tetrismatrix::menus.pop(); tetrismatrix::menus.push(createMenu(Menus::GAME_OVER)); showResults();};
+        tetrismatrix::menus.top()->callback = [](){tetrismatrix::popMenu(); tetrismatrix::menus.push(createMenu(Menus::GAME_OVER)); current_match->showResults();};
         tetrismatrix::menus.top()->executeSelectedOption();
         break;
     }

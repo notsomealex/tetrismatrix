@@ -29,9 +29,6 @@ void Piece::movePiece()
     int16_t keys_held = InputManager::keys_held[controller];
 
 
-    if(keys_held & KEY_L || keys_held & KEY_R)
-        swapPiece();
-
     if (keys_pressed & KEY_UP)
     {
         hardDrop();
@@ -114,6 +111,9 @@ void Piece::movePiece()
         rotateCCW();
         frames_moving++;
     }
+
+    if(keys_held & KEY_L || keys_held & KEY_R)
+        swapPiece();
 }
 
 void Piece::hardDrop()

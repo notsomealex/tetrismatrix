@@ -75,7 +75,7 @@ void tetrismatrix::updateGame()
                 while(!menus.empty())
                 {
                     menu_types.push(*menus.top()->menu_type);
-                    menus.pop();
+                    popMenu();
                 }
                 while(!menu_types.empty())
                 {
@@ -194,13 +194,13 @@ Menu* tetrismatrix::createMenu(Menus menu_type)
                 Menu::Option(
                 translate(current_language, Texts::RESUME),
                 []()
-                { menus.pop(); current_match->paused = false; hub75.clear(); InputManager::clearAllInputs();},
+                { popMenu(); current_match->paused = false; hub75.clear(); InputManager::clearAllInputs();},
                 true),
 
                 Menu::Option(
                 translate(current_language, Texts::EXIT),
                 []()
-                { if(current_match != nullptr) delete current_match; current_match = nullptr; menus.pop(); menus.top()->hide_menu = false; InputManager::clearAllInputs(); if(!tetrismatrix::vertical) tetrismatrix::vertical = true;},
+                { if(current_match != nullptr) delete current_match; current_match = nullptr; popMenu(); menus.top()->hide_menu = false; InputManager::clearAllInputs(); if(!tetrismatrix::vertical) tetrismatrix::vertical = true;},
                 true)
             };
             title = translate(current_language, PAUSE);
@@ -252,7 +252,7 @@ Menu* tetrismatrix::createMenu(Menus menu_type)
                     { InputManager::clearAllInputs();},
                     (OptionValue*)&selected_match_settings.velocity,
                     1,
-                    10,
+                    15,
                     true)
             }
         };
@@ -320,7 +320,7 @@ Menu* tetrismatrix::createMenu(Menus menu_type)
                     { InputManager::clearAllInputs();},
                     (OptionValue*)&selected_match_settings.max_velocity,
                     2,
-                    10,
+                    15,
                     true));
 
             if(selected_game_mode == GameModes::VERSUS)
@@ -347,7 +347,7 @@ Menu* tetrismatrix::createMenu(Menus menu_type)
             options.push_back(Menu::Option(
                     translate(current_language, Texts::START),
                     []()
-                    { menus.pop(); menus.top()->hide_menu = true; current_match = new Match(selected_match_settings, selected_game_mode); InputManager::clearAllInputs();},
+                    {current_match = new Match(selected_match_settings, selected_game_mode); InputManager::clearAllInputs(); popMenu(); menus.top()->hide_menu = true;},
                     true));
             title = translate(current_language, Texts::SETTINGS);
     
@@ -358,13 +358,13 @@ Menu* tetrismatrix::createMenu(Menus menu_type)
                 Menu::Option(
                     translate(current_language, Texts::RETRY),
                     []()
-                    {menus.push(createMenu(Menus::MATCH_SETTINGS)); InputManager::clearAllInputs();},
+                    {if(current_match != nullptr) delete current_match; menus.push(createMenu(Menus::MATCH_SETTINGS)); InputManager::clearAllInputs();},
                     true),
 
                 Menu::Option(
                     translate(current_language, Texts::EXIT),
                     []()
-                    {if(current_match != nullptr) delete current_match; current_match = nullptr; menus.pop(); menus.top()->hide_menu = false; InputManager::clearAllInputs(); if(!tetrismatrix::vertical) tetrismatrix::vertical = true; InputManager::clearAllInputs();}, 
+                    {if(current_match != nullptr) delete current_match; current_match = nullptr; popMenu(); menus.top()->hide_menu = false; InputManager::clearAllInputs(); if(!tetrismatrix::vertical) tetrismatrix::vertical = true; InputManager::clearAllInputs();}, 
                     true)
             }
         };
@@ -395,7 +395,7 @@ Menu* tetrismatrix::createMenu(Menus menu_type)
             menu->callback = [menu](){
                 if(InputManager::keys_pressed[InputManager::controllers[0]] & KEY_START)
                 {
-                    tetrismatrix::menus.pop();
+                    tetrismatrix::popMenu();
                     InputManager::clearAllInputs();
                     current_match->paused = false;
                     hub75.clear();
@@ -405,7 +405,7 @@ Menu* tetrismatrix::createMenu(Menus menu_type)
                     if(current_match != nullptr) 
                         delete current_match; 
                     current_match = nullptr; 
-                    menus.pop(); 
+                    popMenu(); 
                     menus.top()->hide_menu = false; 
                     InputManager::clearAllInputs();
                 }
@@ -431,6 +431,15 @@ Menu* tetrismatrix::createMenu(Menus menu_type)
     }
     menu->menu_type = menu_type;
     return menu;
+}
+
+inline void tetrismatrix::popMenu()
+{
+    if(menus.empty()) return;
+    if(menus.top() != nullptr)
+       delete menus.top();
+       
+    menus.pop();
 }
 
 int tetrismatrix::screenWidth()
