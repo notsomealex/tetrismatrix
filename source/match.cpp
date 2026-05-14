@@ -73,7 +73,7 @@ void Match::updateMatch()
         paused = true;
     }
         
-    printf("updating match!");
+    //printf("updating match!");
     
     for(int i = 0; i < boards.size(); i++)
     {
@@ -156,6 +156,10 @@ void Match::updateMatch()
             break;
         }
         case GameModes::VERSUS:
+        {
+            static std::unordered_map<Piece*, int> garbage_values;
+            static std::unordered_map<Piece*, bool> sends_garbage_next; 
+
             while(InputManager::controllers.size() != 2)
                 InputManager::searchForControllers();
             showUpcomingPieces(pieces[0], pieces[0]->board->board_pos_x - 5, pieces[0]->board->board_pos_y, true, false);
@@ -163,7 +167,43 @@ void Match::updateMatch()
 
             if(pieces[0]->checkCollision() & COLLISION_DIRECTION::UP || pieces[1]->checkCollision() & COLLISION_DIRECTION::UP)
                 gameOver();
+
+            for(auto& piece : pieces)
+            {
+                if(piece->just_solidified)
+                {
+                    if(piece->board->cleared_lines > 1)
+                    {
+                        garbage_values[piece] += piece->board->cleared_lines * std::get<int>(settings.garbage_multiplier);
+                        sends_garbage_next[piece] = true;
+                    }
+                }
+            }
+
+
+            std::function<void(Piece*, Piece*)> send_garbage = 
+            [this](Piece* sender_piece, Piece* receiver_piece)
+            {
+                int lines_to_send = 0;
+                int lines_avoided = 0;
+                if(sends_garbage_next[sender_piece] && receiver_piece->just_solidified)
+                {
+                    lines_avoided = ((garbage_values[receiver_piece]) / 8);
+                    lines_to_send = garbage_values[sender_piece] / 8;
+                    if(lines_avoided > lines_to_send) lines_avoided = lines_to_send;
+                    lines_to_send -= lines_avoided;
+                    garbage_values[receiver_piece] -= lines_avoided * std::get<int>(settings.garbage_blocking);
+
+                    receiver_piece->board->addGarbageLines(garbage_values[sender_piece] / 4);
+                    garbage_values[sender_piece] = 0;
+                    sends_garbage_next[sender_piece] = false;
+                }
+            };
+            send_garbage(pieces[0], pieces[1]);
+            send_garbage(pieces[1], pieces[0]);
+            //printf("lines to send: %i", lines_to_send);
             break;
+        }
         case GameModes::COOP:
             while(InputManager::controllers.size() != 2)
                 InputManager::searchForControllers();
@@ -396,7 +436,8 @@ void Match::gameOver()
         };
         tetrismatrix::menus.push(new Menu(options));
         tetrismatrix::menus.top()->executeSelectedOption();
-        tetrismatrix::menus.top()->on_close = [](){tetrismatrix::popMenu(); tetrismatrix::popMenu(); tetrismatrix::menus.push(createMenu(Menus::GAME_OVER)); InputManager::clearAllInputs();};
+        // OKAY. so for some fucking reason only god knows why, the this pointer is getting corrupted or something, so i have to do the trick that is below. dont ask me why, i do not know.
+        tetrismatrix::menus.top()->on_close = [this](){auto self = this; tetrismatrix::popMenu(); tetrismatrix::popMenu(); tetrismatrix::menus.push(createMenu(Menus::GAME_OVER)); self->showResults(self->pieces[0]);InputManager::clearAllInputs();};
 
         break;
 
@@ -415,13 +456,13 @@ void Match::gameOver()
         tetrismatrix::vertical = true;
         tetrismatrix::menus.push(new Menu(options));
         tetrismatrix::menus.top()->executeSelectedOption();
-        tetrismatrix::menus.top()->on_close = [this](){ tetrismatrix::menus.push(createMenu(Menus::GAME_OVER)); showResults(pieces[1]);};
+        tetrismatrix::menus.top()->on_close = [this](){ auto self = this; tetrismatrix::menus.push(createMenu(Menus::GAME_OVER)); self->showResults(self->pieces[1]);};
 
 
         options[0].name = translate(current_language, Texts::PLAYER) + "1: " + translate(current_language, Texts::ENTER_YOUR_NAME);
         tetrismatrix::menus.push(new Menu(options));
         tetrismatrix::menus.top()->executeSelectedOption();
-        tetrismatrix::menus.top()->on_close = [this](){ tetrismatrix::popMenu(); tetrismatrix::popMenu(); showResults(pieces[0]);};
+        tetrismatrix::menus.top()->on_close = [this](){ auto self = this; tetrismatrix::popMenu(); tetrismatrix::popMenu(); self->showResults(self->pieces[0]);};
 
         break;
     }
@@ -457,7 +498,7 @@ void Match::gameWin()
         };
         tetrismatrix::menus.push(new Menu(options));
         tetrismatrix::menus.top()->executeSelectedOption();
-        tetrismatrix::menus.top()->on_close = [this](){tetrismatrix::popMenu(); tetrismatrix::menus.push(createMenu(Menus::GAME_OVER)); InputManager::clearAllInputs();}; // FIXED OMFG
+        tetrismatrix::menus.top()->on_close = [this](){auto self = this; tetrismatrix::popMenu(); tetrismatrix::menus.push(createMenu(Menus::GAME_OVER)); self->showResults(self->pieces[0]); InputManager::clearAllInputs();};
 
         break;
 

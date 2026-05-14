@@ -125,6 +125,27 @@ void Board::removeLines()
     this->cleared_lines = lines_cleared;
 }
 
+void Board::addGarbageLines(int amount)
+{
+    if(amount <= 0) return;
+    int empty_column = rand() % board_width;
+
+    std::vector<int> garbage_row(board_width, PIECES::GARBAGE);
+    for(int i = 0; i < board_height - amount; i++)
+    {
+        board_matrix[i] = board_matrix[i + amount];
+    }
+
+    for(int i = 0; i < amount; i++)
+    {
+        board_matrix[board_height - i - 1] = garbage_row;
+        board_matrix[board_height - i - 1][empty_column] = PIECES::NONE;
+    }
+
+
+}
+
+
 void Board::resetBoard()
 {
     for (int i = 0; i < board_height; i++)

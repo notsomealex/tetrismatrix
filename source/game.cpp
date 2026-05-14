@@ -342,8 +342,8 @@ Menu* tetrismatrix::createMenu(Menus menu_type)
                     []()
                     { InputManager::clearAllInputs();}, 
                     (OptionValue*)&selected_match_settings.garbage_multiplier,
-                    1,
-                    100,
+                    0,
+                    10,
                     true));
 
                     options.push_back(Menu::Option(
@@ -351,8 +351,8 @@ Menu* tetrismatrix::createMenu(Menus menu_type)
                     []()
                     { InputManager::clearAllInputs();},
                     (OptionValue*)&selected_match_settings.garbage_blocking,
-                    1,
-                    100,
+                    0,
+                    10,
                     true));
                 }
 

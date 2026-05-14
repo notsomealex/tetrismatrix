@@ -31,7 +31,8 @@ enum PIECES
     S,
     Z,
     T,
-    GHOST
+    GHOST,
+    GARBAGE
 };
 
 struct Color
@@ -50,7 +51,8 @@ inline std::unordered_map<PIECES, Color> piece_colors =
     {S, {57, 20, 255}},
     {Z, {238, 43, 75}},
     {T, {191, 255, 0}},
-    {GHOST, {50, 50, 50}}
+    {GHOST, {50, 50, 50}},
+    {GARBAGE, {100, 100, 100}}
 };
 
 // u8 bitmask
