@@ -48,7 +48,7 @@ inline std::unordered_map<GameModes, MatchSettings> default_settings
     {
         GameModes::MARATHON,
         {
-            .max_amount_upcoming_pieces = 5,
+            .max_amount_upcoming_pieces = 3,
             .game_scale = 2,
             .board_width = 10,
             .board_height = 20,
@@ -61,7 +61,7 @@ inline std::unordered_map<GameModes, MatchSettings> default_settings
     {
         GameModes::VERSUS,
         {
-            .max_amount_upcoming_pieces = 5,
+            .max_amount_upcoming_pieces = 1,
             .game_scale = 2,
             .board_width = 10,
             .board_height = 16,
@@ -77,10 +77,10 @@ inline std::unordered_map<GameModes, MatchSettings> default_settings
     {
         GameModes::COOP,
         {
-            .max_amount_upcoming_pieces = 5,
+            .max_amount_upcoming_pieces = 1,
             .game_scale = 2,
-            .board_width = 30,
-            .board_height = 20,
+            .board_width = 24,
+            .board_height = 16,
             .velocity = 1,
             .lock_delay = 60, 
 
@@ -116,6 +116,8 @@ public:
     std::unordered_map<Piece*, int> scores;
     std::unordered_map<Board*, int> total_lines_cleared;
     std::unordered_map<Board*, int> current_velocity_lines_cleared;
+    std::unordered_map<Piece*, bool> filled_board;
+
 
     std::unordered_map<Board*, int> singles_amount;
     std::unordered_map<Board*, int> doubles_amount;

@@ -30,10 +30,70 @@ void Match::initMatch()
             boards[1]->board_pos_y = 0;
             break;
         case GameModes::COOP:
+        {
             tetrismatrix::vertical = false;
             while(InputManager::controllers.size() != 2)
                 InputManager::searchForControllers();
-            pieces.push_back(new Piece(boards[0], std::get<int>(settings.game_scale), 30 / std::get<int>(settings.velocity), std::get<int>(settings.lock_delay), InputManager::controllers[1]));
+            pieces.push_back(new Piece((boards[0]->board_width * 3) / 4, boards[0], std::get<int>(settings.game_scale), 30 / std::get<int>(settings.velocity), std::get<int>(settings.lock_delay), InputManager::controllers[1]));
+            boards[0]->board_pos_x = 4;
+            boards[0]->board_pos_y = 0;
+            pieces[0]->start_pos_x = boards[0]->board_width / 4;
+            pieces[0]->pos_x = boards[0]->board_width / 4;
+
+            auto check_pieces_collision = std::make_shared<std::function<uint8_t(Piece*, Piece*)>>(
+            [](Piece* piece, Piece* colliding_piece)
+            {
+                uint8_t collision = 0;
+
+                // I HATE THIS. but there is not much way around it if i want good collision detection, sorry.
+                for(int i = 0; i < piece->current_piece_matrix.size(); i++)
+                {
+                    for(int j = 0; j < piece->current_piece_matrix[0].size(); j++)
+                    {
+                        int piece_pos_x = j + piece->pos_x;
+                        int piece_pos_y = i + piece->pos_y;
+                        for(int k = 0; k < colliding_piece->current_piece_matrix.size(); k++)
+                        {
+                            for(int l = 0; l < colliding_piece->current_piece_matrix[0].size(); l++)
+                            {
+                                int colliding_piece_pos_x = l + colliding_piece->pos_x;
+                                int colliding_piece_pos_y = k + colliding_piece->pos_y;
+
+                                if(piece_pos_x + 1 == colliding_piece_pos_x && piece_pos_y == colliding_piece_pos_y
+                                    && piece->current_piece_matrix[i][j] != PIECES::NONE
+                                    && colliding_piece->current_piece_matrix[k][l] != PIECES::NONE)
+                                        collision |= COLLISION_DIRECTION::RIGHT;
+
+                                if(piece_pos_x - 1 == colliding_piece_pos_x && piece_pos_y == colliding_piece_pos_y
+                                    && piece->current_piece_matrix[i][j] != PIECES::NONE
+                                    && colliding_piece->current_piece_matrix[k][l] != PIECES::NONE)
+                                        collision |= COLLISION_DIRECTION::LEFT;
+
+                                if(piece_pos_y + 1 == colliding_piece_pos_y && piece_pos_x == colliding_piece_pos_x
+                                    && piece->current_piece_matrix[i][j] != PIECES::NONE
+                                    && colliding_piece->current_piece_matrix[k][l] != PIECES::NONE)
+                                        collision |= COLLISION_DIRECTION::DOWN;
+
+                                /*
+                                if(piece_pos_y - 1 == colliding_piece_pos_y && piece_pos_x == colliding_piece_pos_x
+                                    && piece->current_piece_matrix[i][j] != PIECES::NONE
+                                    && colliding_piece->current_piece_matrix[k][l] != PIECES::NONE)
+                                        collision |= COLLISION_DIRECTION::UP;
+                                */
+                            }
+                        }
+                    }
+                }
+                //printf("collision: %i", collision);
+                return collision;
+            });
+
+            pieces[0]->extra_collision = [check_pieces_collision, this](){ return (*check_pieces_collision)(pieces[0], pieces[1]);  };
+            pieces[1]->extra_collision = [check_pieces_collision, this](){ return (*check_pieces_collision)(pieces[1], pieces[0]);  };
+
+
+
+        }
             break;
         case GameModes::MARATHON:
 
@@ -159,13 +219,17 @@ void Match::updateMatch()
         {
             static std::unordered_map<Piece*, int> garbage_values;
             static std::unordered_map<Piece*, bool> sends_garbage_next; 
-
             while(InputManager::controllers.size() != 2)
                 InputManager::searchForControllers();
-            showUpcomingPieces(pieces[0], pieces[0]->board->board_pos_x - 5, pieces[0]->board->board_pos_y, true, false);
-            showUpcomingPieces(pieces[1], pieces[1]->board->board_pos_x + (pieces[1]->board->board_width) + 1, pieces[1]->board->board_pos_y, true, false);
+            showUpcomingPieces(pieces[0], pieces[0]->board->board_pos_x - 4, pieces[0]->board->board_pos_y + 2, true, false);
+            showHoldPiece(pieces[0], pieces[0]->board->board_pos_x - 4, pieces[0]->board->board_pos_y + 2 + (pieces[0]->upcoming_pieces.size() + 3) * 5, true, false);
 
-            if(pieces[0]->checkCollision() & COLLISION_DIRECTION::UP || pieces[1]->checkCollision() & COLLISION_DIRECTION::UP)
+            showUpcomingPieces(pieces[1], pieces[1]->board->board_pos_x + (pieces[1]->board->board_width) + 1, pieces[1]->board->board_pos_y + 2, true, false);
+            showHoldPiece(pieces[1], (pieces[1]->board->board_pos_x + pieces[1]->board->board_width + 1) * pieces[1]->scale, pieces[1]->board->board_pos_y + 2 + ((pieces[1]->upcoming_pieces.size() + 3) * 5), true, false);
+
+
+            if(pieces[0]->checkCollision() & COLLISION_DIRECTION::UP || pieces[1]->checkCollision() & COLLISION_DIRECTION::UP
+                || filled_board[pieces[0]] || filled_board[pieces[1]])
                 gameOver();
 
             for(auto& piece : pieces)
@@ -194,7 +258,7 @@ void Match::updateMatch()
                     lines_to_send -= lines_avoided;
                     garbage_values[receiver_piece] -= lines_avoided * std::get<int>(settings.garbage_blocking);
 
-                    receiver_piece->board->addGarbageLines(garbage_values[sender_piece] / 4);
+                    filled_board[receiver_piece] = receiver_piece->board->addGarbageLines(garbage_values[sender_piece] / 4);
                     garbage_values[sender_piece] = 0;
                     sends_garbage_next[sender_piece] = false;
                 }
@@ -205,11 +269,21 @@ void Match::updateMatch()
             break;
         }
         case GameModes::COOP:
+        {
             while(InputManager::controllers.size() != 2)
                 InputManager::searchForControllers();
-            showUpcomingPieces(pieces[0], pieces[0]->board->board_pos_x, pieces[0]->board->board_pos_y - 10, true, false);
-            showUpcomingPieces(pieces[1], pieces[1]->board->board_pos_x + 10, pieces[1]->board->board_pos_y - 10, true, false);
+            
+            showUpcomingPieces(pieces[0], 0, pieces[0]->board->board_pos_y - 10, true, false);
+            showUpcomingPieces(pieces[1], SCREEN_WIDTH, pieces[1]->board->board_pos_y - 10, true, false);
+
+            if(pieces[0]->checkCollision() & COLLISION_DIRECTION::UP || pieces[1]->checkCollision() & COLLISION_DIRECTION::UP)
+            {
+                gameOver();
+            }
+            
+
             break;
+        }
     }
 }
 
@@ -221,6 +295,8 @@ void Match::setUpcomingPieces(Piece* piece)
     }
     piece->next_piece = piece->upcoming_pieces.front();
     piece->upcoming_pieces.pop_front();
+    piece->upcoming_pieces.push_back((PIECES)((rand() % 7) + 1));
+
 
 }
 
@@ -251,7 +327,7 @@ void Match::showUpcomingPieces(Piece* piece, int pos_x, int pos_y, bool vertical
         clearRegionOfScreen(tetrismatrix::hub75, 
             pos_x * piece->scale, 
             pos_y * piece->scale, 
-            (pos_x + 4) * piece->scale, 
+            (pos_x + 3) * piece->scale, 
             (pos_y + 4 * (piece->upcoming_pieces.size() + 1)) * piece->scale, 
             tetrismatrix::vertical);
     else
@@ -327,13 +403,13 @@ void Match::showHoldPiece(Piece* piece, int pos_x, int pos_y, bool vertical_layo
         draw4x3Text(tetrismatrix::hub75, tetrismatrix::graphics, drawn_hold_text, pos_x - 1, pos_y - 1, 255, 255, 255, tetrismatrix::vertical);
     }
 
-    int piece_pos_x = vertical_layout ? pos_x + 2 : pos_x + drawn_hold_text.size() * 3;
+    int piece_pos_x = vertical_layout ? pos_x + 1 : pos_x + drawn_hold_text.size() * 3;
     int piece_pos_y = vertical_layout ? pos_y + (2 * piece->scale) - 1 : pos_y;
 if(vertical_layout)
     clearRegionOfScreen(tetrismatrix::hub75, 
         pos_x, 
-        piece_pos_y, 
-        pos_x + (4 * piece->scale), 
+        piece_pos_y - 1, 
+        pos_x + (4 * piece->scale) - 1, 
         piece_pos_y + (4 * piece->scale), 
         tetrismatrix::vertical);
 else
@@ -341,7 +417,7 @@ else
         piece_pos_x, 
         piece_pos_y, 
         piece_pos_x + (4 * piece->scale), 
-        piece_pos_y + (4 * piece->scale), 
+        piece_pos_y + (3 * piece->scale), 
         tetrismatrix::vertical);
 
     piece->printPiece(shapes[piece->hold_piece], (piece_pos_x / piece->scale) - piece->board->board_pos_x, (piece_pos_y / piece->scale) - piece->board->board_pos_y, piece->scale);
@@ -373,6 +449,7 @@ void Match::gameOver()
             break;
 
         case GameModes::VERSUS:
+        {
             int gg_pos_x;
             int gg_pos_y = 10;
             Board* loser_board;
@@ -381,7 +458,7 @@ void Match::gameOver()
             pieces[0]->updatePiece();
             pieces[1]->updatePiece();
 
-            if(pieces[0]->checkCollision() & COLLISION_DIRECTION::UP)
+            if(pieces[0]->checkCollision() & COLLISION_DIRECTION::UP || filled_board[pieces[0]])
             {
                 loser_board = pieces[0]->board;
                 winner_board = pieces[1]->board;
@@ -416,6 +493,23 @@ void Match::gameOver()
             pieces[0]->board->printBoard(false);
             pieces[1]->board->printBoard(false);
             break;
+        }
+
+        case GameModes::COOP:
+            for(int i = 0; i < boards[0]->board_height; i++)
+            {
+                for(int j = 0; j < boards[0]->board_width; j++)
+                {
+                    if(boards[0]->board_matrix[i][j] == PIECES::NONE)
+                        continue;
+                    boards[0]->board_matrix[i][j] = PIECES::GHOST;
+                    boards[0]->updateBoard();
+                    sleep_ms(5);
+                }
+            }
+            //draw5x5Text(tetrismatrix::hub75, tetrismatrix::graphics, translate(current_language, Texts::GAME_OVER), 30, 16, 255, 255, 255, tetrismatrix::vertical);
+            boards[0]->updateBoard();
+            break;
             
     }
 
@@ -441,6 +535,7 @@ void Match::gameOver()
 
         break;
 
+        case GameModes::COOP:
         case GameModes::VERSUS:
         options = 
         {
@@ -454,13 +549,13 @@ void Match::gameOver()
             )
         };
         tetrismatrix::vertical = true;
-        tetrismatrix::menus.push(new Menu(options));
+        tetrismatrix::menus.push(new Menu(options, pieces[1]->controller));
         tetrismatrix::menus.top()->executeSelectedOption();
         tetrismatrix::menus.top()->on_close = [this](){ auto self = this; tetrismatrix::menus.push(createMenu(Menus::GAME_OVER)); self->showResults(self->pieces[1]);};
 
 
         options[0].name = translate(current_language, Texts::PLAYER) + "1: " + translate(current_language, Texts::ENTER_YOUR_NAME);
-        tetrismatrix::menus.push(new Menu(options));
+        tetrismatrix::menus.push(new Menu(options, pieces[0]->controller));
         tetrismatrix::menus.top()->executeSelectedOption();
         tetrismatrix::menus.top()->on_close = [this](){ auto self = this; tetrismatrix::popMenu(); tetrismatrix::popMenu(); self->showResults(self->pieces[0]);};
 
@@ -553,7 +648,7 @@ void Match::showResults(Piece* player_piece)
         { 
             if(InputManager::keys_pressed[player_piece->controller] & KEY_A)
                 InputManager::keys_pressed[player_piece->controller] |= KEY_B;
-        }));
+        }, nullptr, player_piece->controller));
 
 }
 

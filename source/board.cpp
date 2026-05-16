@@ -125,14 +125,24 @@ void Board::removeLines()
     this->cleared_lines = lines_cleared;
 }
 
-void Board::addGarbageLines(int amount)
+// returns whether the garbage lines made the board full.
+bool Board::addGarbageLines(int amount)
 {
-    if(amount <= 0) return;
+    if(amount <= 0) return false;
+    bool made_board_full = false;
     int empty_column = rand() % board_width;
 
     std::vector<int> garbage_row(board_width, PIECES::GARBAGE);
     for(int i = 0; i < board_height - amount; i++)
     {
+        if(i == 0)
+        {
+            for(int j = 0; j < board_width; j++)
+            {
+                if(board_matrix[i][j] != PIECES::NONE)
+                    made_board_full = true;                
+            }
+        }
         board_matrix[i] = board_matrix[i + amount];
     }
 
@@ -142,6 +152,7 @@ void Board::addGarbageLines(int amount)
         board_matrix[board_height - i - 1][empty_column] = PIECES::NONE;
     }
 
+    return made_board_full;
 
 }
 

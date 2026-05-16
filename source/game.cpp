@@ -42,6 +42,10 @@ void tetrismatrix::initGame()
         }
     }
     printf("bluetooth input started!\n");
+    while (InputManager::controllers.empty())
+    {
+        InputManager::searchForControllers();
+    }
 
 
     Menu* main_menu = createMenu(Menus::MAIN_MENU);

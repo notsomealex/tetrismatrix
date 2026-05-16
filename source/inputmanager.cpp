@@ -33,7 +33,7 @@ void core1_program()
 }
 
 bool InputManager::connecting_controller = false;
-bool InputManager::pairing_enabled = false;
+bool InputManager::pairing_enabled = true;
 bool InputManager::new_controller_found = false;
 std::vector<uni_hid_device_t*> InputManager::devices;
 std::vector<uni_controller_t*> InputManager::controllers;
