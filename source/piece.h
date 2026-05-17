@@ -59,12 +59,8 @@ public:
     int frames_colliding_down = 0;
     int frames_since_hit_ground = 0;
     int lock_delay = 60;
-    int start_pos_x = 0;
 
     uni_controller_t* controller;
-
-    std::function<uint16_t()> extra_collision = nullptr;
-
 
 
 
@@ -97,8 +93,6 @@ public:
     void swapPiece();
 
     Piece(Board *board, int scale, int falling_frequency, int lock_delay, uni_controller_t* controller);
-    Piece(int start_pos_x, Board *board, int scale, int falling_frequency, int lock_delay, uni_controller_t* controller);
-
 };
 
 #endif

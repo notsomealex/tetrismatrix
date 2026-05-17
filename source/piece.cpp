@@ -7,7 +7,7 @@ void Piece::initPiece()
 {
     shape = (PIECES)((rand() % 7) + 1);
     current_piece_matrix = shapes[shape];
-    pos_x = start_pos_x;
+    pos_x = board->boardCenter();
     pos_y = 0;
 }
 
@@ -19,7 +19,6 @@ void Piece::updatePiece()
 
 void Piece::movePiece()
 {
-
     int temp_pos_x = pos_x;
     int temp_pos_y = pos_y;
 
@@ -30,7 +29,10 @@ void Piece::movePiece()
     int16_t keys_held = InputManager::keys_held[controller];
 
 
-
+    if (keys_pressed & KEY_UP)
+    {
+        hardDrop();
+    }
 
     if (checkCollision() & COLLISION_DIRECTION::DOWN)
     {
@@ -90,11 +92,6 @@ void Piece::movePiece()
         frames_moving++;
     else
         frames_moving = 0;
-
-    if (keys_pressed & KEY_UP)
-    {
-        hardDrop();
-    }
 
     if ((checkCollision() & COLLISION_DIRECTION::DOWN && (frames_colliding_down >= lock_delay || frames_since_hit_ground >= 240)))
     {
@@ -302,9 +299,6 @@ uint8_t Piece::checkCollision()
     if (pos_y + (int)current_piece_matrix.size() >= board->bottomTileLimit())
         collision_direction |= COLLISION_DIRECTION::DOWN;
 
-    if(extra_collision != nullptr)
-        collision_direction |= extra_collision();
-
     return collision_direction;
 }
 
@@ -334,7 +328,7 @@ void Piece::restartPiece()
 {
     pos_y = 0;
     hit_ground = false;
-    pos_x = start_pos_x;
+    pos_x = board->boardCenter();
 
     current_piece_matrix = shapes[shape];
 }
@@ -350,8 +344,6 @@ void Piece::swapPiece()
         hold_piece = old_piece;
         shape = upcoming_pieces.front();
         upcoming_pieces.pop_front();
-        upcoming_pieces.push_back((PIECES)((rand() % 7) + 1));
-
     }
     else
     {
@@ -367,14 +359,7 @@ void Piece::swapPiece()
 
 // idk why i dont use more this syntax for constructors.
 Piece::Piece(Board *board, int scale, int falling_frequency, int lock_delay, uni_controller_t* controller)
-: Piece(0, board, scale, falling_frequency, lock_delay, controller)
-{
-    start_pos_x = board->boardCenter();
-}
-
-Piece::Piece(int start_pos_x, Board *board, int scale, int falling_frequency, int lock_delay, uni_controller_t* controller)
-: start_pos_x(start_pos_x), board(board), scale(scale), falling_frequency(falling_frequency), lock_delay(lock_delay), controller(controller)
+: board(board), scale(scale), falling_frequency(falling_frequency), lock_delay(lock_delay), controller(controller)
 {
     initPiece();
 }
-

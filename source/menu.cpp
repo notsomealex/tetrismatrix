@@ -14,26 +14,16 @@ std::vector<std::vector<int>> arrow =
 Menu::Option::Option(std::string name, std::function<void()> on_click, OptionValue *associated_value, int associated_value_min, int associated_value_max, bool visible) : name(name), on_click(on_click), associated_value(associated_value), visible(visible), associated_value_min(associated_value_min), associated_value_max(associated_value_max) {}
 Menu::Option::Option(std::string name, std::function<void()> on_click, bool visible) : name(name), on_click(on_click), visible(visible) {}
 
-Menu::Menu(std::vector<Option> options) : Menu("", options, nullptr, nullptr, InputManager::controllers[0])
-{
-}
-Menu::Menu(std::vector<Option> options, uni_controller_t* controller) : Menu("", options, nullptr, nullptr, controller)
-{
-
-}
-
-Menu::Menu(std::string title, std::vector<Option> options, std::function<void()> callback) : Menu(title, options, callback, nullptr, InputManager::controllers[0])
+Menu::Menu(std::vector<Option> options) : Menu("", options, nullptr)
 {
 }
 
+Menu::Menu(std::string title, std::vector<Option> options, std::function<void()> callback) : Menu(title, options, callback, nullptr)
+{
+}
 
 // if on_close is not nullptr, IT MUST manually pop the menu.
-Menu::Menu(std::string title, std::vector<Option> options, std::function<void()> callback, std::function<void()> on_close) : Menu(title, options, callback, on_close, InputManager::controllers[0])
-{
-
-}
-
-Menu::Menu(std::string title, std::vector<Option> options, std::function<void()> callback, std::function<void()> on_close, uni_controller_t* controller) : title(title), options(options), callback(callback), on_close(on_close), controller(controller)
+Menu::Menu(std::string title, std::vector<Option> options, std::function<void()> callback, std::function<void()> on_close) : title(title), options(options), callback(callback), on_close(on_close)
 {
     Option back_option("Back", [this]()
                        { if(this->on_close != nullptr) this->on_close(); else tetrismatrix::popMenu(); }, false);
@@ -42,7 +32,6 @@ Menu::Menu(std::string title, std::vector<Option> options, std::function<void()>
     pos_x = tetrismatrix::vertical ? SCREEN_HEIGHT / 2 : SCREEN_WIDTH / 2 - 2;
     pos_y = tetrismatrix::vertical ? SCREEN_HEIGHT / 2 - 6 : SCREEN_HEIGHT / 2 - 6;
 }
-
 
 void Menu::displayMenu(PicoGraphics_PenRGB888 &graphics, Hub75 &hub75)
 {
@@ -110,7 +99,7 @@ void Menu::displayMenu(PicoGraphics_PenRGB888 &graphics, Hub75 &hub75)
         if (i == selected_index)
         {
             arrow_pos_y = y;
-            int16_t keys_held = InputManager::keys_held[controller];
+            int16_t keys_held = InputManager::keys_held[InputManager::controllers[0]];
             if (tetrismatrix::frames % 20 == 0 || selection_changed)
             {
                 arrow_pos_x = (arrow_pos_x == x - 5) ? x - 4 : x - 5;
@@ -164,7 +153,7 @@ void Menu::updateMenu(PicoGraphics_PenRGB888 &graphics, Hub75 &hub75)
     if (callback != NULL)
         this->callback();
 
-    int16_t keys_pressed = InputManager::keys_pressed[controller];
+    int16_t keys_pressed = InputManager::keys_pressed[InputManager::controllers[0]];
 
     if (keys_pressed & KEY_A)
     {
@@ -240,10 +229,9 @@ void Menu::modifySelectedOptionValue()
     auto option = options[selected_index];
     int px = pos_x;
     int py = pos_y;
-    uni_controller_t* ctrlr = controller;
 
     tetrismatrix::menus.push(new Menu(options[selected_index].name, {},
-                                      [option, px, py, ctrlr]()
+                                      [option, px, py]()
                                       {
                                           int initial_left_pos_x = 0;
                                           int initial_right_pos_x = 0;
@@ -262,7 +250,7 @@ void Menu::modifySelectedOptionValue()
                                           static int left_pos_x = initial_left_pos_x;
                                           static int right_pos_x = initial_right_pos_x;
 
-                                          int16_t keys_held = InputManager::keys_held[ctrlr];
+                                          int16_t keys_held = InputManager::keys_held[InputManager::controllers[0]];
 
                                           // for strings.
                                           static int selected_char_index = 0;
@@ -430,5 +418,5 @@ void Menu::modifySelectedOptionValue()
                                               draw4x3Text(tetrismatrix::hub75, tetrismatrix::graphics, "<", left_pos_x, py + ((title_words.size() + 1) * 5), 255, 255, 255, tetrismatrix::vertical);
                                               draw4x3Text(tetrismatrix::hub75, tetrismatrix::graphics, ">", right_pos_x, py + ((title_words.size() + 1) * 5), 255, 255, 255, tetrismatrix::vertical);
                                           }
-                                      }, nullptr, controller));
+                                      }));
 }

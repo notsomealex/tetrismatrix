@@ -28,7 +28,7 @@ public:
     int topTileLimit();
     int boardCenter();
     void removeLines();
-    bool addGarbageLines(int amount);
+    void addGarbageLines(int amount);
     void resetBoard();
 
     Board();
