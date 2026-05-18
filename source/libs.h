@@ -31,6 +31,8 @@
 #include "pico/mem_ops.h"
 #include <optional>
 #include <variant>
+#include <memory>
+#include <cctype>
 using namespace pimoroni;
 
 #endif

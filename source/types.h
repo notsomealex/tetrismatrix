@@ -18,7 +18,8 @@ enum class Menus
     GAME_MODE_SELECTION,
     MATCH_SETTINGS,
     GAME_OVER,
-    RESULTS
+    RESULTS,
+    CONNECT_TO_NETWORK
 };
 
 enum PIECES

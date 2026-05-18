@@ -89,7 +89,7 @@ namespace tetrismatrix
     int screenHeight();
 
     Menu* createMenu(Menus menu_type);
-        void popMenu();
+    void popMenu();
 };
 
     // Callback for the dma interrupt (required)

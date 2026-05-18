@@ -300,5 +300,19 @@ inline void rainbowEffect(std::array<uint8_t, 3>& rgb, std::array<int, 3>& incre
     }
 }
 
+inline void trimTrailingSpaces(std::string& text)
+{
+    size_t last = text.find_last_not_of(" \t\n\r\f\v");
+    
+    if (last == std::string::npos) 
+    {
+        text.clear();
+    } 
+    else 
+    {
+        text.erase(last + 1);
+    }
+}
+
 
 #endif

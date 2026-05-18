@@ -42,12 +42,8 @@ std::unordered_map<uni_controller_t*, int16_t> InputManager::keys_pressed;
 
 bool InputManager::init()
 {
-    if (cyw43_arch_init()) {
-        printf("failed to initialise cyw43_arch\n");
-        return false;
-    }
 
-        // Must be called before uni_init()
+    // Must be called before uni_init()
     uni_platform_set_custom(get_my_platform());
 
     // Initialize BP32

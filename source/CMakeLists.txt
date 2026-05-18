@@ -6,13 +6,15 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set(CMAKE_CXX_STANDARD 20) 
 
 # lik all source files.
-add_executable(tetrismatrix main.cpp board.cpp game.cpp match.cpp piece.cpp menu.cpp my_platform.c inputmanager.cpp databasemanager.cpp)
+add_executable(tetrismatrix main.cpp board.cpp game.cpp match.cpp piece.cpp menu.cpp my_platform.c inputmanager.cpp databasemanager.cpp networkmanager.cpp)
 
 
 target_include_directories(tetrismatrix PRIVATE
         ${CMAKE_CURRENT_LIST_DIR}
         ${CMAKE_SOURCE_DIR}/utilities/hub75
         ${CMAKE_SOURCE_DIR}/utilities/hub75/libraries
+        ${PICO_SDK_PATH}/lib/lwip/contrib/ports/freertos/include
+        ${PICO_SDK_PATH}/src/rp2_common/pico_lwip/include
 )
 # Generate PIO header
 pico_generate_pio_header(tetrismatrix ${CMAKE_CURRENT_LIST_DIR}/../blink.pio)
@@ -34,6 +36,8 @@ target_link_libraries(tetrismatrix
         libsqlite3
         filesystem_default
         filesystem_vfs
+        pico_lwip
+        pico_lwip_nosys
 )
 
 

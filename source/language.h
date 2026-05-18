@@ -59,7 +59,17 @@ enum class Texts
     DOUBLE,
     TRIPLE,
     TETRIS,
-    PLAYER
+    PLAYER,
+    NETWORKS,
+    CONNECT_TO_NETWORK,
+    PASSWORD,
+    TIMEOUT,
+    REACHED,
+    WRONG,
+    UNKNOWN,
+    ERROR,
+    CONNECTING,
+    NETWORK
 };
 using enum Texts;
 
@@ -118,7 +128,17 @@ inline Translations translations = {
             {DOUBLE, "DOUBLE"},
             {TRIPLE, "TRIPLE"},
             {TETRIS, "TETRIS"},
-            {PLAYER, "PLAYER"}
+            {PLAYER, "PLAYER"},
+            {NETWORKS, "NETWORKS"},
+            {CONNECT_TO_NETWORK, "CONNECT TO NETWORK"},
+            {PASSWORD, "PASSWORD"},
+            {TIMEOUT, "TIMEOUT"},
+            {REACHED, "REACHED"},
+            {WRONG, "WRONG"},
+            {UNKNOWN, "UNKNOWN"},
+            {ERROR, "ERROR"},
+            {CONNECTING, "CONNECTING"},
+            {NETWORK, "NETWORK"}
         }
     },
     {
@@ -172,7 +192,17 @@ inline Translations translations = {
             {DOUBLE, "DOBLE"},
             {TRIPLE, "TRIPLE"},
             {TETRIS, "TETRIS"},
-            {PLAYER, "JUGADOR"}
+            {PLAYER, "JUGADOR"},
+            {NETWORKS, "REDES"},
+            {CONNECT_TO_NETWORK, "CONECTARSE A RED"},
+            {PASSWORD, "CONTRASENA"},
+            {TIMEOUT, "TIMEOUT"},
+            {REACHED, "ALCANZADO"},
+            {WRONG, "EQUIVOCADA"},
+            {UNKNOWN, "DESCONOCIDO"},
+            {ERROR, "ERROR"},
+            {CONNECTING, "CONNECTANDO"},
+            {NETWORK, "RED"}
 
             
         }
