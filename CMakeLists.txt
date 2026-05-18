@@ -61,11 +61,11 @@ add_subdirectory(${BLUEPAD32_ROOT}/src/components/bluepad32 libbluepad32)
 include_directories(${CMAKE_SOURCE_DIR}/utilities/hub75)
 add_subdirectory(utilities/hub75/libraries/pico_graphics)
 add_subdirectory(utilities/hub75)
-add_subdirectory(utilities/pico-sqlite)
+#add_subdirectory(utilities/pico-sqlite)
 
 add_subdirectory(source)
 
-pico_enable_filesystem(tetrismatrix AUTO_INIT TRUE)
+#pico_enable_filesystem(tetrismatrix AUTO_INIT TRUE)
 
 # optimizations to make binary size smaller.
 target_compile_options(tetrismatrix PRIVATE -Os)

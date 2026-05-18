@@ -4,7 +4,6 @@
 #include "language.h"
 #include "helpers.h"
 #include "inputmanager.h"
-#include "databasemanager.h"
 #include "networkmanager.h"
 
 bool tetrismatrix::debug = true;
