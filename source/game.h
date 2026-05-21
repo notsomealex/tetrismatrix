@@ -45,7 +45,6 @@ enum class Language;
 #define UART_TX_PIN 4
 #define UART_RX_PIN 5
 
-enum class GameModes;
 struct MatchSettings;
 
 

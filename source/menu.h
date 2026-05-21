@@ -37,6 +37,8 @@ class Menu
     int arrow_pos_y = 0;
     std::array<uint8_t, 3> arrow_color = {255, 255, 255};
     bool hide_menu = false;
+    
+    uni_controller_t* controller;
 
     void displayMenu(PicoGraphics_PenRGB888& graphics, Hub75& hub75);
     void updateMenu(PicoGraphics_PenRGB888& graphics, Hub75& hub75);
@@ -45,6 +47,10 @@ class Menu
 
     Menu(std::string title, std::vector<Option> options, std::function<void()> callback);
     Menu(std::string title, std::vector<Option> options, std::function<void()> callback, std::function<void()> on_close);
+    Menu(std::string title, std::vector<Option> options, std::function<void()> callback, std::function<void()> on_close, uni_controller_t* controller);
+
 
     Menu(std::vector<Option> options);
+    Menu(std::vector<Option> options, uni_controller_t* controller);
+
 };

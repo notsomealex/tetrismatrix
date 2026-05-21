@@ -20,12 +20,12 @@ int DatabaseManager::parseId(const std::string& response)
 int DatabaseManager::savePlayer(const std::string& name) 
 {
     std::string body = "{\"name\":\"" + name + "\"}";
-    std::string response = NetworkManager::httpPost(SERVER_IP, 8000, "/players/find_or_create", body.c_str());
+    std::string response = NetworkManager::httpPost(SERVER_URL, PORT, "/players/find_or_create", body.c_str());
     return parseId(response);
 }
 std::optional<Player> DatabaseManager::getPlayer(int id) 
 {
-    std::string response = NetworkManager::httpGet(SERVER_IP, 8000, ("/players/" + std::to_string(id)).c_str());
+    std::string response = NetworkManager::httpGet(SERVER_URL, PORT, ("/players/" + std::to_string(id)).c_str());
     std::string body = NetworkManager::extractBody(response);
     printf("getPlayer response: %s\n", response.c_str());
     if(body.empty()) 
@@ -46,7 +46,7 @@ std::optional<Player> DatabaseManager::getPlayer(int id)
 int DatabaseManager::saveMatch(GameModes game_mode) 
 {
     std::string body = "{\"game_mode_id\":" + std::to_string((int)game_mode) + "}";
-    std::string response = NetworkManager::httpPost(SERVER_IP, 8000, "/match", body.c_str());
+    std::string response = NetworkManager::httpPost(SERVER_URL, PORT, "/match", body.c_str());
     return parseId(response);
 }
 
@@ -54,7 +54,7 @@ int DatabaseManager::saveMatch(GameModes game_mode)
 std::vector<Match> DatabaseManager::getAllMatches()
 {
     std::vector<Match> matches;
-    std::string response = NetworkManager::httpGet(SERVER_IP, 8000, "/matches");
+    std::string response = NetworkManager::httpGet(SERVER_URL, PORT, "/matches");
     std::string body = NetworkManager::extractBody(response);
     
     size_t pos = 0;
@@ -80,7 +80,7 @@ std::vector<Match> DatabaseManager::getAllMatches()
 
 std::optional<Match> DatabaseManager::getMatch(int id)
 {
-    std::string response = NetworkManager::httpGet(SERVER_IP, 8000, ("/matches/" + std::to_string(id)).c_str());
+    std::string response = NetworkManager::httpGet(SERVER_URL, PORT, ("/matches/" + std::to_string(id)).c_str());
     std::string body = NetworkManager::extractBody(response);
     if(body.find("null") != std::string::npos || body.empty()) return std::nullopt;
     
@@ -110,14 +110,14 @@ int DatabaseManager::saveScoreEntry(int match_id, int player_id, int score, int 
                       ",\"doubles\":" + std::to_string(doubles) +
                       ",\"triples\":" + std::to_string(triples) +
                       ",\"tetris\":" + std::to_string(tetris) + "}";
-    std::string response = NetworkManager::httpPost(SERVER_IP, 8000, "/score_entries", body.c_str());
+    std::string response = NetworkManager::httpPost(SERVER_URL, PORT, "/score_entries", body.c_str());
     return parseId(response);
 }
 // Score entries
 std::vector<ScoreEntry> DatabaseManager::getAllScoreEntries()
 {
     std::vector<ScoreEntry> entries;
-    std::string response = NetworkManager::httpGet(SERVER_IP, 8000, "/score_entries");
+    std::string response = NetworkManager::httpGet(SERVER_URL, PORT, "/score_entries");
     std::string body = NetworkManager::extractBody(response);
 
     size_t pos = 0;
@@ -149,7 +149,7 @@ std::vector<ScoreEntry> DatabaseManager::getAllScoreEntries()
 std::vector<ScoreEntry> DatabaseManager::getHigherScoreEntries(int amount)
 {
     std::vector<ScoreEntry> entries;
-    std::string response = NetworkManager::httpGet(SERVER_IP, 8000, ("/amount_score_entries/" + std::to_string(amount)).c_str());
+    std::string response = NetworkManager::httpGet(SERVER_URL, PORT, ("/amount_score_entries/" + std::to_string(amount)).c_str());
     std::string body = NetworkManager::extractBody(response);
 
     size_t pos = 0;
@@ -180,7 +180,7 @@ std::vector<ScoreEntry> DatabaseManager::getHigherScoreEntries(int amount)
 
 std::optional<ScoreEntry> DatabaseManager::getScoreEntry(int id)
 {
-    std::string response = NetworkManager::httpGet(SERVER_IP, 8000, ("/score_entries/" + std::to_string(id)).c_str());
+    std::string response = NetworkManager::httpGet(SERVER_URL, PORT, ("/score_entries/" + std::to_string(id)).c_str());
     std::string body = NetworkManager::extractBody(response);
     if(body.find("null") != std::string::npos || body.empty()) return std::nullopt;
 
@@ -209,7 +209,7 @@ bool DatabaseManager::saveOrUpdateGameSettings(int volume_music, int volume_sfx,
     std::string body = "{\"volume_music\":" + std::to_string(volume_music) +
                       ",\"volume_sfx\":" + std::to_string(volume_sfx) +
                       ",\"language_id\":" + std::to_string((int)language) + "}";
-    std::string response = NetworkManager::httpPost(SERVER_IP, 8000, "/game_settings", body.c_str());
+    std::string response = NetworkManager::httpPost(SERVER_URL, PORT, "/game_settings", body.c_str());
     return parseId(response) != -1;
 }
 

@@ -49,6 +49,10 @@ void tetrismatrix::initGame()
     }
     printf("bluetooth input started!\n");
 
+    while (InputManager::controllers.empty())
+    {
+        InputManager::searchForControllers();
+    }
 
 
     Menu *main_menu = createMenu(Menus::MAIN_MENU);
@@ -199,7 +203,7 @@ Menu *tetrismatrix::createMenu(Menus menu_type)
                 }};
             title = translate(current_language, Texts::OPTIONS);
             break;
-case Menus::SCORES:
+            case Menus::SCORES:
             {
                 
                 title = translate(current_language, Texts::SCORES);
@@ -219,6 +223,11 @@ case Menus::SCORES:
                 for(auto& entry : entries)
                 {
                     auto player = DatabaseManager::getPlayer(entry.player_id);
+                    if(!player.has_value()) 
+                    {
+                        printf("player %d not found, skipping\n", entry.player_id);
+                        continue;
+                    }
                     auto match = DatabaseManager::getMatch(entry.match_id);
                     std::string option_text = player.value().name + ": " + std::to_string(entry.score);
                     printf("option_text: %s", option_text.c_str());
@@ -320,11 +329,6 @@ case Menus::SCORES:
                             {selected_game_mode = GameModes::COOP; selected_match_settings = default_settings[GameModes::COOP]; menus.push(createMenu(Menus::MATCH_SETTINGS)); InputManager::clearAllInputs(); },
                             true),
 
-                    Menu::Option(
-                            translate(current_language, Texts::DUAL_BOARD),
-                            []()
-                            {selected_game_mode = GameModes::DUAL_BOARD; selected_match_settings = default_settings[GameModes::DUAL_BOARD]; menus.push(createMenu(Menus::MATCH_SETTINGS)); InputManager::clearAllInputs(); },
-                            true),
                 }};
             title = translate(current_language, Texts::GAME_MODE);
             break;
@@ -491,15 +495,13 @@ case Menus::SCORES:
                                     [network, current_language, password, password_size]()
                                     {
                                     std::string& s = std::get<std::string>(*password);
-                                    if(s.size() < password_size)
-                                    s.resize(password_size, ' ');
 
                                     menus.top()->title = translate(current_language, Texts::PASSWORD);
                                     menus.top()->on_close =
-                                    [&password, network, current_language]()
+                                    [password, network, current_language]()
                                     {
                                     trimTrailingSpaces(std::get<std::string>(*password));
-
+ 
                                     NetworkManager::enable();
                                     // FOR TESTING. REMOVE
                                     if(network.ssid == "Totalplay-21AA")

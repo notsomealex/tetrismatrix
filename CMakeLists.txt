@@ -68,7 +68,7 @@ add_subdirectory(source)
 #pico_enable_filesystem(tetrismatrix AUTO_INIT TRUE)
 
 # optimizations to make binary size smaller.
-target_compile_options(tetrismatrix PRIVATE -Os)
+target_compile_options(tetrismatrix PRIVATE -Os -Wno-error=incompatible-pointer-types)
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 set(PICO_CXX_ENABLE_EXCEPTIONS 0)
 set(PICO_CXX_ENABLE_RTTI 0)

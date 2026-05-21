@@ -5,8 +5,8 @@ enum class Language;
 
 enum class GameModes;
 
-#define SERVER_IP 
-
+#define SERVER_URL "tasty-beds-drop.loca.lt" // this wont change unless my laptop dies....
+#define PORT 80
 
 namespace DatabaseManager
 {

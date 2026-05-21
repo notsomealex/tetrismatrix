@@ -4,6 +4,7 @@
 
 
 
+
 struct MatchSettings
 {
     // DEFAULT
@@ -39,7 +40,7 @@ inline std::unordered_map<GameModes, MatchSettings> default_settings
     {
         GameModes::MARATHON,
         {
-            .max_amount_upcoming_pieces = 5,
+            .max_amount_upcoming_pieces = 3,
             .game_scale = 2,
             .board_width = 10,
             .board_height = 20,
@@ -52,7 +53,7 @@ inline std::unordered_map<GameModes, MatchSettings> default_settings
     {
         GameModes::VERSUS,
         {
-            .max_amount_upcoming_pieces = 5,
+            .max_amount_upcoming_pieces = 1,
             .game_scale = 2,
             .board_width = 10,
             .board_height = 16,
@@ -68,10 +69,10 @@ inline std::unordered_map<GameModes, MatchSettings> default_settings
     {
         GameModes::COOP,
         {
-            .max_amount_upcoming_pieces = 5,
+            .max_amount_upcoming_pieces = 1,
             .game_scale = 2,
-            .board_width = 30,
-            .board_height = 20,
+            .board_width = 24,
+            .board_height = 16,
             .velocity = 1,
             .lock_delay = 60, 
 
@@ -104,21 +105,20 @@ public:
     MatchSettings settings;
     GameModes game_mode = GameModes::ZEN;
 
-
-    // here each piece represents a player. could be better but meh.
     std::unordered_map<Piece*, int> scores;
     std::unordered_map<Piece*, int> total_lines_cleared;
     std::unordered_map<Piece*, int> current_velocity_lines_cleared;
+    std::unordered_map<Piece*, bool> filled_board;
+    std::unordered_map<Piece*, bool> won;
+
 
     std::unordered_map<Piece*, int> singles_amount;
     std::unordered_map<Piece*, int> doubles_amount;
     std::unordered_map<Piece*, int> triples_amount;
     std::unordered_map<Piece*, int> tetris_amount;
-    std::unordered_map<Piece*, bool> won;
-    
-    std::unordered_map<Piece*, OptionValue> names;
 
-    OptionValue current_player_name = "";
+    std::unordered_map<Piece*, std::string> names;
+
 
     
     std::string date;

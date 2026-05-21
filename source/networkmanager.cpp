@@ -203,26 +203,59 @@ struct HttpContext
     bool error = false;   
 };
 
+static void dns_callback(const char* name, const ip_addr_t* addr, void* arg)
+{
+    DnsResult* result = (DnsResult*)arg;
+    if(addr != nullptr) {
+        result->addr = *addr;
+        result->resolved = true;
+    } else {
+        result->failed = true;
+    }
+}
+
+ip_addr_t NetworkManager::resolveHostname(const char* hostname)
+{
+    DnsResult result;
+    err_t err = dns_gethostbyname(hostname, &result.addr, dns_callback, &result);
+    
+    if(err == ERR_OK) {
+        // already cached
+        return result.addr;
+    }
+    
+    // wait for DNS resolution
+    uint32_t start = to_ms_since_boot(get_absolute_time());
+    while(!result.resolved && !result.failed) 
+    {
+        cyw43_arch_poll();
+        if(to_ms_since_boot(get_absolute_time()) - start > 5000) 
+        {
+            printf("DNS timeout\n");
+            break;
+        }
+    }
+    
+    return result.addr;
+}
 // the recv callback - called whenever data arrives from the server
 static err_t http_recv(void* arg, struct tcp_pcb* pcb, struct pbuf* p, err_t err)
 {
     HttpContext* ctx = (HttpContext*)arg;
 
-    if(p == NULL) {
-        // NULL pbuf means the server closed the connection - we're done
+    if(p == NULL) 
+    {
         ctx->done = true;
         tcp_close(pcb);
         return ERR_OK;
     }
 
-    // copy received data into our response string
     char* buf = new char[p->len + 1];
     memcpy(buf, p->payload, p->len);
     buf[p->len] = 0;
     ctx->response += buf;
     delete[] buf;
 
-    // tell lwIP we've consumed this data
     tcp_recved(pcb, p->tot_len);
     pbuf_free(p);
     return ERR_OK;
@@ -271,10 +304,10 @@ std::string NetworkManager::httpPost(const char* server_ip, uint16_t port, const
     ctx.request += "Content-Length: ";
     ctx.request += std::to_string(strlen(body));
     ctx.request += "\r\n";
+    ctx.request += "ngrok-skip-browser-warning: true\r\n";  // add here
     ctx.request += "Connection: close\r\n";
-    ctx.request += "\r\n";
+    ctx.request += "\r\n";  // blank line must be last before body
     ctx.request += body;
-
 
 
     // create a new TCP control block
@@ -291,12 +324,14 @@ std::string NetworkManager::httpPost(const char* server_ip, uint16_t port, const
     tcp_err(pcb, http_err);
 
     // convert IP string to lwIP address struct
-    ip_addr_t addr;
-    if(ipaddr_aton(server_ip, &addr) == 0) {
-        printf("invalid ip address\n");
+    ip_addr_t addr = NetworkManager::resolveHostname(server_ip);
+    printf("resolved: %s\n", ipaddr_ntoa(&addr));
+    if(ip_addr_isany(&addr)) 
+    {
+        printf("DNS resolution failed\n");
         tcp_abort(pcb);
         return "";
-    }
+    }  
 
     printf("connecting to %s:%d%s\n", server_ip, port, path);
 
@@ -337,8 +372,10 @@ std::string NetworkManager::httpGet(const char* server_ip, uint16_t port, const 
     ctx.request += "Host: ";
     ctx.request += server_ip;
     ctx.request += "\r\n";
+    ctx.request += "ngrok-skip-browser-warning: true\r\n";
     ctx.request += "Connection: close\r\n";
     ctx.request += "\r\n";
+    
 
     struct tcp_pcb* pcb = tcp_new();
     if(!pcb) {
@@ -350,12 +387,14 @@ std::string NetworkManager::httpGet(const char* server_ip, uint16_t port, const 
     tcp_recv(pcb, http_recv);
     tcp_err(pcb, http_err);
 
-    ip_addr_t addr;
-    if(ipaddr_aton(server_ip, &addr) == 0) {
-        printf("invalid ip address\n");
+    ip_addr_t addr = NetworkManager::resolveHostname(server_ip);
+    printf("resolved: %s\n", ipaddr_ntoa(&addr));
+    if(ip_addr_isany(&addr)) 
+    {
+        printf("DNS resolution failed\n");
         tcp_abort(pcb);
         return "";
-    }
+    }  
 
     err_t err = tcp_connect(pcb, &addr, port, http_connected);
     if(err != ERR_OK) {

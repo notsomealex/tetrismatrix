@@ -1,5 +1,12 @@
 #include "libs.h"
 
+struct DnsResult 
+{
+    ip_addr_t addr;
+    bool resolved = false;
+    bool failed = false;
+};
+
 namespace NetworkManager
 {
 
@@ -29,6 +36,8 @@ namespace NetworkManager
     std::string extractBody(const std::string& response);
     std::string httpPost(const char* server_ip, uint16_t port, const char* path, const char* body);
     std::string httpGet(const char* server_ip, uint16_t port, const char* path);
+
+    ip_addr_t resolveHostname(const char* hostname);
 
 
     bool getNearNetworks();

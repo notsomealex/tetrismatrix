@@ -6,32 +6,43 @@
 
 int32_t white = rgb_to_int32(255, 255, 255);
 std::vector<std::vector<int>> arrow =
-{
-    {0, 0, white, 0},
-    {0, 0, 0, white},
-    {0, 0, white, 0}};
+    {
+        {0, 0, white, 0},
+        {0, 0, 0, white},
+        {0, 0, white, 0}};
 
 Menu::Option::Option(std::string name, std::function<void()> on_click, OptionValue *associated_value, int associated_value_min, int associated_value_max, bool visible) : name(name), on_click(on_click), associated_value(associated_value), visible(visible), associated_value_min(associated_value_min), associated_value_max(associated_value_max) {}
 Menu::Option::Option(std::string name, std::function<void()> on_click, bool visible) : name(name), on_click(on_click), visible(visible) {}
 
-Menu::Menu(std::vector<Option> options) : Menu("", options, nullptr)
+Menu::Menu(std::vector<Option> options) : Menu("", options, nullptr, nullptr, InputManager::controllers[0])
+{
+}
+Menu::Menu(std::vector<Option> options, uni_controller_t* controller) : Menu("", options, nullptr, nullptr, controller)
+{
+
+}
+
+Menu::Menu(std::string title, std::vector<Option> options, std::function<void()> callback) : Menu(title, options, callback, nullptr, InputManager::controllers[0])
 {
 }
 
-Menu::Menu(std::string title, std::vector<Option> options, std::function<void()> callback) : Menu(title, options, callback, nullptr)
-{
-}
 
 // if on_close is not nullptr, IT MUST manually pop the menu.
-Menu::Menu(std::string title, std::vector<Option> options, std::function<void()> callback, std::function<void()> on_close) : title(title), options(options), callback(callback), on_close(on_close)
+Menu::Menu(std::string title, std::vector<Option> options, std::function<void()> callback, std::function<void()> on_close) : Menu(title, options, callback, on_close, InputManager::controllers[0])
+{
+
+}
+
+Menu::Menu(std::string title, std::vector<Option> options, std::function<void()> callback, std::function<void()> on_close, uni_controller_t* controller) : title(title), options(options), callback(callback), on_close(on_close), controller(controller)
 {
     Option back_option("Back", [this]()
-            { if(this->on_close != nullptr) this->on_close(); else tetrismatrix::popMenu(); }, false);
+                       { if(this->on_close != nullptr) this->on_close(); else tetrismatrix::popMenu(); }, false);
     this->options.push_back(back_option);
 
     pos_x = tetrismatrix::vertical ? SCREEN_HEIGHT / 2 : SCREEN_WIDTH / 2 - 2;
     pos_y = tetrismatrix::vertical ? SCREEN_HEIGHT / 2 - 6 : SCREEN_HEIGHT / 2 - 6;
 }
+
 
 void Menu::displayMenu(PicoGraphics_PenRGB888 &graphics, Hub75 &hub75)
 {
@@ -99,7 +110,7 @@ void Menu::displayMenu(PicoGraphics_PenRGB888 &graphics, Hub75 &hub75)
         if (i == selected_index)
         {
             arrow_pos_y = y;
-            int16_t keys_held = InputManager::keys_held[InputManager::controllers[0]];
+            int16_t keys_held = InputManager::keys_held[controller];
             if (tetrismatrix::frames % 20 == 0 || selection_changed)
             {
                 arrow_pos_x = (arrow_pos_x == x - 5) ? x - 4 : x - 5;
@@ -153,7 +164,7 @@ void Menu::updateMenu(PicoGraphics_PenRGB888 &graphics, Hub75 &hub75)
     if (callback != NULL)
         this->callback();
 
-    int16_t keys_pressed = InputManager::keys_pressed[InputManager::controllers[0]];
+    int16_t keys_pressed = InputManager::keys_pressed[controller];
 
     if (keys_pressed & KEY_A)
     {
@@ -201,6 +212,7 @@ void Menu::executeSelectedOption()
 
     bool has_associated_value = options[selected_index].associated_value != nullptr;
     auto on_click = options[selected_index].on_click;
+    
 
     if (has_associated_value)
         modifySelectedOptionValue();
@@ -229,188 +241,183 @@ void Menu::modifySelectedOptionValue()
     auto option = options[selected_index];
     int px = pos_x;
     int py = pos_y;
+    uni_controller_t* ctrlr = controller;
+
+
+    
 
     tetrismatrix::menus.push(new Menu(options[selected_index].name, {},
-                [option, px, py]()
-                {
+                                      [option, px, py, ctrlr]()
+                                      {
+                                          int initial_left_pos_x = 0;
+                                          int initial_right_pos_x = 0;
+                                          if (std::holds_alternative<int>(*option.associated_value))
+                                          {
+                                              initial_left_pos_x = px - (std::to_string(std::abs(std::get<int>(*option.associated_value))).size() + 4);
+                                              initial_right_pos_x = px + (std::to_string(std::abs(std::get<int>(*option.associated_value))).size() + 5);
+                                          }
+                                          else if (std::holds_alternative<EnumOption>(*option.associated_value))
+                                          {
+                                              auto value = std::get<EnumOption>(*option.associated_value);
+                                              int offset = 5;
+                                              initial_left_pos_x = px - (value.labels[value.value].size() / 2) * 4 - offset;
+                                              initial_right_pos_x = px + (value.labels[value.value].size() / 2) * 4 + offset;
+                                          }
+                                          static int left_pos_x = initial_left_pos_x;
+                                          static int right_pos_x = initial_right_pos_x;
 
-                int initial_left_pos_x = 0;
-                int initial_right_pos_x = 0;
-                if (std::holds_alternative<int>(*option.associated_value))
-                {
-                initial_left_pos_x = px - (std::to_string(std::abs(std::get<int>(*option.associated_value))).size() + 4);
-                initial_right_pos_x = px + (std::to_string(std::abs(std::get<int>(*option.associated_value))).size() + 5);
-                }
-                else if (std::holds_alternative<EnumOption>(*option.associated_value))
-                {
-                auto value = std::get<EnumOption>(*option.associated_value);
-                int offset = 5;
-                initial_left_pos_x = px - (value.labels[value.value].size() / 2) * 4 - offset;
-                initial_right_pos_x = px + (value.labels[value.value].size() / 2) * 4 + offset;
-                }
-                static int left_pos_x = initial_left_pos_x;
-                static int right_pos_x = initial_right_pos_x;
+                                          int16_t keys_held = InputManager::keys_held[ctrlr];
 
-                int16_t keys_held = InputManager::keys_held[InputManager::controllers[0]];
+                                          // for strings.
+                                          static int selected_char_index = 0;
 
-                // for strings.
-                static int selected_char_index = 0;
+                                          if (tetrismatrix::frames % 5 == 0)
+                                          {
+                                              // arrow drawing logic
+                                              if (keys_held & KEY_LEFT)
+                                                  left_pos_x = (left_pos_x == initial_left_pos_x) ? initial_left_pos_x + 2 : initial_left_pos_x;
+                                              else
+                                                  left_pos_x = initial_left_pos_x;
 
-                if (tetrismatrix::frames % 5 == 0)
-                {
-                    // arrow drawing logic
-                    if (keys_held & KEY_LEFT)
-                        left_pos_x = (left_pos_x == initial_left_pos_x) ? initial_left_pos_x + 2 : initial_left_pos_x;
-                    else
-                        left_pos_x = initial_left_pos_x;
+                                              if (keys_held & KEY_RIGHT)
+                                                  right_pos_x = (right_pos_x == initial_right_pos_x) ? initial_right_pos_x + 2 : initial_right_pos_x;
+                                              else
+                                                  right_pos_x = initial_right_pos_x;
 
-                    if (keys_held & KEY_RIGHT)
-                        right_pos_x = (right_pos_x == initial_right_pos_x) ? initial_right_pos_x + 2 : initial_right_pos_x;
-                    else
-                        right_pos_x = initial_right_pos_x;
+                                              // associated value changing logic
 
-                    // associated value changing logic
+                                              if (std::holds_alternative<int>(*option.associated_value) || std::holds_alternative<EnumOption>(*option.associated_value))
+                                              {
+                                                  int *p_value;
+                                                  if (std::holds_alternative<int>(*option.associated_value))
+                                                      p_value = &std::get<int>(*option.associated_value);
+                                                  else if (std::holds_alternative<EnumOption>(*option.associated_value))
+                                                      p_value = (int *)(&std::get<EnumOption>(*option.associated_value).value);
 
-                    if (std::holds_alternative<int>(*option.associated_value) || std::holds_alternative<EnumOption>(*option.associated_value))
-                    {
-                        int *p_value;
-                        if (std::holds_alternative<int>(*option.associated_value))
-                            p_value = &std::get<int>(*option.associated_value);
-                        else if (std::holds_alternative<EnumOption>(*option.associated_value))
-                            p_value = (int *)(&std::get<EnumOption>(*option.associated_value).value);
+                                                  int &value = *p_value;
 
-                        int &value = *p_value;
+                                                  int min_value = option.associated_value_min;
+                                                  int max_value = option.associated_value_max;
+                                                  if (keys_held & KEY_LEFT)
+                                                  {
+                                                      value--;
+                                                      if (value < min_value)
+                                                          value = min_value;
+                                                  }
 
-                        int min_value = option.associated_value_min;
-                        int max_value = option.associated_value_max;
-                        if (keys_held & KEY_LEFT)
-                        {
-                            value--;
-                            if (value < min_value)
-                                value = min_value;
-                        }
+                                                  if (keys_held & KEY_RIGHT)
+                                                  {
+                                                      value++;
+                                                      if (value > max_value)
+                                                          value = max_value;
+                                                  }
+                                                  // printf("value: %i", value);
+                                                  // printf("max: %i", max_value);
+                                                  // printf("min: %i", min_value);
+                                              }
+                                              else if (std::holds_alternative<bool>(*option.associated_value))
+                                              {
+                                                  bool &value = std::get<bool>(*option.associated_value);
 
-                        if (keys_held & KEY_RIGHT)
-                        {
-                            value++;
-                            if (value > max_value)
-                                value = max_value;
-                        }
-                        // printf("value: %i", value);
-                        // printf("max: %i", max_value);
-                        // printf("min: %i", min_value);
-                    }
-                    else if (std::holds_alternative<bool>(*option.associated_value))
-                    {
-                        bool &value = std::get<bool>(*option.associated_value);
+                                                  if ((keys_held & KEY_LEFT) || (keys_held & KEY_RIGHT))
+                                                      value = !value;
+                                              }
+                                              else if (std::holds_alternative<std::string>(*option.associated_value))
+                                              {
+                                                  std::string &associated_string = std::get<std::string>(*option.associated_value);
+                                                  if (keys_held & KEY_LEFT)
+                                                      selected_char_index--;
 
-                        if ((keys_held & KEY_LEFT) || (keys_held & KEY_RIGHT))
-                            value = !value;
-                    }
-                    else if (std::holds_alternative<std::string>(*option.associated_value))
-                    {
-                        std::string &associated_string = std::get<std::string>(*option.associated_value);
-                        if (keys_held & KEY_LEFT)
-                            selected_char_index--;
+                                                  if (keys_held & KEY_RIGHT)
+                                                      selected_char_index++;
 
-                        if (keys_held & KEY_RIGHT)
-                            selected_char_index++;
+                                                  if (selected_char_index < 0)
+                                                      selected_char_index = 0;
+                                                  else if (selected_char_index > associated_string.size() - 1)
+                                                      selected_char_index = associated_string.size() - 1;
 
-                        if (selected_char_index < 0)
-                            selected_char_index = 0;
-                        else if (selected_char_index > associated_string.size() - 1)
-                            selected_char_index = associated_string.size() - 1;
+const std::string chars = " ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{}|;':\",./<>?";
 
-                        const std::string chars = " ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{}|;':\",./<>?";
+if(keys_held & KEY_UP)
+{
+    size_t pos = chars.find(associated_string[selected_char_index]);
+    if(pos == std::string::npos || pos == chars.size() - 1)
+        associated_string[selected_char_index] = chars[0];
+    else
+        associated_string[selected_char_index] = chars[pos + 1];
+}
 
-                        if(keys_held & KEY_UP)
-                        {
-                            size_t pos = chars.find(associated_string[selected_char_index]);
-                            if(pos == std::string::npos || pos == chars.size() - 1)
-                                associated_string[selected_char_index] = chars[0];
-                            else
-                                associated_string[selected_char_index] = chars[pos + 1];
-                        }
+if(keys_held & KEY_DOWN)
+{
+    size_t pos = chars.find(associated_string[selected_char_index]);
+    if(pos == std::string::npos || pos == 0)
+        associated_string[selected_char_index] = chars[chars.size() - 1];
+    else
+        associated_string[selected_char_index] = chars[pos - 1];
+}
+                                              }
+                                          }
+                                          // drawing logic
+                                          std::stringstream ss(option.name);
+                                          std::string word;
+                                          std::vector<std::string> title_words;
 
-                        if(keys_held & KEY_DOWN)
-                        {
-                            size_t pos = chars.find(associated_string[selected_char_index]);
-                            if(pos == std::string::npos || pos == 0)
-                                associated_string[selected_char_index] = chars[chars.size() - 1];
-                            else
-                                associated_string[selected_char_index] = chars[pos - 1];
-                        }
-                    }
-                    else
-                    {
-                        printf("unknown type!!!\n\n");
-                    }
-                }
-                // drawing logic
-                std::stringstream ss(option.name);
-                std::string word;
-                std::vector<std::string> title_words;
+                                          while (ss >> word)
+                                          {
+                                              title_words.push_back(word);
+                                          }
 
-                while (ss >> word)
-                {
-                    title_words.push_back(word);
-                }
+                                          if (std::holds_alternative<int>(*option.associated_value))
+                                          {
+                                              int value = std::get<int>(*option.associated_value);
+                                              draw4x3Text(tetrismatrix::hub75, tetrismatrix::graphics, std::to_string(value), initial_left_pos_x + 5, py + (title_words.size() + 1) * 5, 255, 255, 255, tetrismatrix::vertical);
+                                          }
+                                          else if (std::holds_alternative<EnumOption>(*option.associated_value))
+                                          {
+                                              int value = (int)(std::get<EnumOption>(*option.associated_value).value);
+                                              draw4x3Text(tetrismatrix::hub75, tetrismatrix::graphics, std::get<EnumOption>(*option.associated_value).labels[value], initial_left_pos_x + 5, py + (title_words.size() + 1) * 5, 255, 255, 255, tetrismatrix::vertical);
+                                          }
+                                          else if (std::holds_alternative<bool>(*option.associated_value))
+                                          {
+                                              Language current_language = (Language)std::get<EnumOption>(tetrismatrix::settings.current_language).value;
+                                              const std::string text = (std::get<bool>(*option.associated_value)) ? (translate(current_language, Texts::YES)) : (translate(current_language, Texts::NO));
+                                              draw4x3Text(tetrismatrix::hub75, tetrismatrix::graphics, text, initial_left_pos_x + 5, py + (title_words.size() + 1) * 5, 255, 255, 255, tetrismatrix::vertical);
+                                          }
+                                          else if (std::holds_alternative<std::string>(*option.associated_value))
+                                          {
+                                              std::string &associated_string = std::get<std::string>(*option.associated_value);
+                                              initial_right_pos_x = px + (associated_string.size() / 2) * 4;
 
-                if (std::holds_alternative<int>(*option.associated_value))
-                {
-                    int value = std::get<int>(*option.associated_value);
-                    draw4x3Text(tetrismatrix::hub75, tetrismatrix::graphics, std::to_string(value), initial_left_pos_x + 5, py + (title_words.size() + 1) * 5, 255, 255, 255, tetrismatrix::vertical);
-                }
-                else if (std::holds_alternative<EnumOption>(*option.associated_value))
-                {
-                    int value = (int)(std::get<EnumOption>(*option.associated_value).value);
-                    draw4x3Text(tetrismatrix::hub75, tetrismatrix::graphics, std::get<EnumOption>(*option.associated_value).labels[value], initial_left_pos_x + 5, py + (title_words.size() + 1) * 5, 255, 255, 255, tetrismatrix::vertical);
-                }
-                else if (std::holds_alternative<bool>(*option.associated_value))
-                {
-                    Language current_language = (Language)std::get<EnumOption>(tetrismatrix::settings.current_language).value;
-                    const std::string text = (std::get<bool>(*option.associated_value)) ? (translate(current_language, Texts::YES)) : (translate(current_language, Texts::NO));
-                    draw4x3Text(tetrismatrix::hub75, tetrismatrix::graphics, text, initial_left_pos_x + 5, py + (title_words.size() + 1) * 5, 255, 255, 255, tetrismatrix::vertical);
-                }
-                else if (std::holds_alternative<std::string>(*option.associated_value))
-                {
-                    std::string &associated_string = std::get<std::string>(*option.associated_value);                                              initial_right_pos_x = px + (associated_string.size() / 2) * 4;
-                    static int scroll_offset = 0;
-                    int horizontal_limit = (tetrismatrix::vertical ? SCREEN_HEIGHT : SCREEN_WIDTH);
-                    int chars_visible = horizontal_limit / 4;
-                    initial_left_pos_x = px - (std::min((int)associated_string.size(), chars_visible) / 2) * 4 - 2;
-                    int draw_pos_x = initial_left_pos_x + 5;
-                    if (selected_char_index >= scroll_offset + chars_visible)
-                        scroll_offset = selected_char_index - chars_visible + 1;
-                    else if (selected_char_index < scroll_offset)
-                        scroll_offset = selected_char_index;
+                                              static int scroll_offset = 0;
+                                              int horizontal_limit = (tetrismatrix::vertical ? SCREEN_HEIGHT : SCREEN_WIDTH);
+                                              int chars_visible = horizontal_limit / 4;
+                                              initial_left_pos_x = px - (std::min((int)associated_string.size(), chars_visible) / 2) * 4 - 4;
+                                              int draw_pos_x = initial_left_pos_x + 5;
 
-                    std::string visible = associated_string.substr(scroll_offset, chars_visible);
 
-                    if (option.associated_value_max > chars_visible && scroll_offset < associated_string.size() - chars_visible)
-                        draw4x3Text(tetrismatrix::hub75, tetrismatrix::graphics, ">", initial_left_pos_x + (visible.length() * 4), py + ((title_words.size() + 1) * 5) + 4, 255, 255, 255, tetrismatrix::vertical);
+                                              if (selected_char_index >= scroll_offset + chars_visible)
+                                                  scroll_offset = selected_char_index - chars_visible + 1;
+                                              else if (selected_char_index < scroll_offset)
+                                                  scroll_offset = selected_char_index;
 
-                    if (scroll_offset > 0)
-                        draw4x3Text(tetrismatrix::hub75, tetrismatrix::graphics, "<", initial_left_pos_x + 5, py + ((title_words.size() + 1) * 5) + 4, 255, 255, 255, tetrismatrix::vertical);
+                                              std::string visible = associated_string.substr(scroll_offset, chars_visible);
 
-                    draw4x3Text(tetrismatrix::hub75, tetrismatrix::graphics, visible, draw_pos_x, py + (title_words.size() + 1) * 5, 255, 255, 255, tetrismatrix::vertical);
+                                              if (option.associated_value_max > chars_visible && scroll_offset < associated_string.size() - chars_visible)
+                                                  draw4x3Text(tetrismatrix::hub75, tetrismatrix::graphics, ">", initial_left_pos_x + (visible.length() * 4), py + ((title_words.size() + 1) * 5) + 4, 255, 255, 255, tetrismatrix::vertical);
 
-                    draw4x3Text(tetrismatrix::hub75, tetrismatrix::graphics, "^", initial_left_pos_x + (selected_char_index - scroll_offset + 1) * 4 + 1, py + ((title_words.size() + 1) * 5) - 4, 255, 255, 255, tetrismatrix::vertical);
-                    draw4x3Text(tetrismatrix::hub75, tetrismatrix::graphics, "v", initial_left_pos_x + (selected_char_index - scroll_offset + 1) * 4 + 1, py + ((title_words.size() + 1) * 5) + 4, 255, 255, 255, tetrismatrix::vertical);
-                }
+                                              if (scroll_offset > 0)
+                                                  draw4x3Text(tetrismatrix::hub75, tetrismatrix::graphics, "<", initial_left_pos_x + 5, py + ((title_words.size() + 1) * 5) + 4, 255, 255, 255, tetrismatrix::vertical);
 
-                if (!std::holds_alternative<std::string>(*option.associated_value))
-                {
-                    draw4x3Text(tetrismatrix::hub75, tetrismatrix::graphics, "<", left_pos_x, py + ((title_words.size() + 1) * 5), 255, 255, 255, tetrismatrix::vertical);
-                    draw4x3Text(tetrismatrix::hub75, tetrismatrix::graphics, ">", right_pos_x, py + ((title_words.size() + 1) * 5), 255, 255, 255, tetrismatrix::vertical);
-                }
-                },
-                [option]()
-                {
-                    if(std::holds_alternative<std::string>(*option.associated_value))
-                    {
-                        trimTrailingSpaces(std::get<std::string>(*option.associated_value));
-                    }
-                    tetrismatrix::popMenu();
-                }));
+                                              draw4x3Text(tetrismatrix::hub75, tetrismatrix::graphics, visible, draw_pos_x, py + (title_words.size() + 1) * 5, 255, 255, 255, tetrismatrix::vertical);
+
+                                              draw4x3Text(tetrismatrix::hub75, tetrismatrix::graphics, "^", initial_left_pos_x + (selected_char_index - scroll_offset + 1) * 4 + 1, py + ((title_words.size() + 1) * 5) - 4, 255, 255, 255, tetrismatrix::vertical);
+                                              draw4x3Text(tetrismatrix::hub75, tetrismatrix::graphics, "v", initial_left_pos_x + (selected_char_index - scroll_offset + 1) * 4 + 1, py + ((title_words.size() + 1) * 5) + 4, 255, 255, 255, tetrismatrix::vertical);
+                                          }
+
+                                          if (!std::holds_alternative<std::string>(*option.associated_value))
+                                          {
+                                              draw4x3Text(tetrismatrix::hub75, tetrismatrix::graphics, "<", left_pos_x, py + ((title_words.size() + 1) * 5), 255, 255, 255, tetrismatrix::vertical);
+                                              draw4x3Text(tetrismatrix::hub75, tetrismatrix::graphics, ">", right_pos_x, py + ((title_words.size() + 1) * 5), 255, 255, 255, tetrismatrix::vertical);
+                                          }
+                                      }, nullptr, controller));
 }

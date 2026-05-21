@@ -215,7 +215,7 @@ inline Translations translations = {
             {WRONG, "EQUIVOCADA"},
             {UNKNOWN, "DESCONOCIDO"},
             {ERROR, "ERROR"},
-            {CONNECTING, "CONNECTANDO"},
+            {CONNECTING, "CONECTANDO"},
             {NETWORK, "RED"},
             {UPLOADING, "SUBIENDO"},
             {UPLOADED, "SUBIDA"},

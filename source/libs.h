@@ -36,6 +36,7 @@
 #include "lwip/apps/http_client.h"
 #include "lwip/tcp.h"
 #include "lwip/ip_addr.h"
+#include "lwip/dns.h"
 
 using namespace pimoroni;
 
