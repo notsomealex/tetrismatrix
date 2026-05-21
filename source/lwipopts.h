@@ -94,4 +94,9 @@
 #define SLIP_DEBUG                  LWIP_DBG_OFF
 #define DHCP_DEBUG                  LWIP_DBG_OFF
 
+#define LWIP_ALTCP               1
+#define LWIP_ALTCP_TLS           0
+#define LWIP_APP_HTTP_CLIENT     1
+
+
 #endif /* __LWIPOPTS_H__ */

@@ -233,6 +233,7 @@ void Menu::modifySelectedOptionValue()
     tetrismatrix::menus.push(new Menu(options[selected_index].name, {},
                 [option, px, py]()
                 {
+
                 int initial_left_pos_x = 0;
                 int initial_right_pos_x = 0;
                 if (std::holds_alternative<int>(*option.associated_value))
@@ -340,6 +341,10 @@ void Menu::modifySelectedOptionValue()
                                 associated_string[selected_char_index] = chars[pos - 1];
                         }
                     }
+                    else
+                    {
+                        printf("unknown type!!!\n\n");
+                    }
                 }
                 // drawing logic
                 std::stringstream ss(option.name);
@@ -405,7 +410,7 @@ void Menu::modifySelectedOptionValue()
                     if(std::holds_alternative<std::string>(*option.associated_value))
                     {
                         trimTrailingSpaces(std::get<std::string>(*option.associated_value));
-
                     }
+                    tetrismatrix::popMenu();
                 }));
 }

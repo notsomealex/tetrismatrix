@@ -24,7 +24,11 @@ namespace NetworkManager
     bool disable();
 
     int connectToNetwork(const std::string& ssid, const std::string& password);
-    bool connectToCurrentNetwork();
+    int connectToCurrentNetwork();
+
+    std::string extractBody(const std::string& response);
+    std::string httpPost(const char* server_ip, uint16_t port, const char* path, const char* body);
+    std::string httpGet(const char* server_ip, uint16_t port, const char* path);
 
 
     bool getNearNetworks();

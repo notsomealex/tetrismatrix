@@ -314,5 +314,37 @@ inline void trimTrailingSpaces(std::string& text)
     }
 }
 
+inline std::vector<std::string> splitStringToWords(const std::string& str) 
+{
+    std::stringstream ss(str);
+    std::string word;
+    std::vector<std::string> words;
+    
+    while (ss >> word) 
+    {
+        words.push_back(word);
+    }
+    return words;
+}
+
+inline void showMessage(Hub75& hub75, const std::string& text, int ms, bool vertical)
+{
+    tetrismatrix::hub75.clear(); 
+    int limit = tetrismatrix::vertical ? SCREEN_HEIGHT : SCREEN_WIDTH;
+    std::vector<std::string> words = splitStringToWords(text);
+
+    int x = tetrismatrix::vertical ? SCREEN_HEIGHT / 2 : SCREEN_WIDTH / 2;
+    int y = tetrismatrix::vertical ? SCREEN_WIDTH / 2 : SCREEN_HEIGHT / 2;
+
+    for(int i = 0; i < words.size(); i++)
+    {
+        cropTextToFit(words[i], 4, limit);
+        draw4x3Text(tetrismatrix::hub75, tetrismatrix::graphics, words[i], x - (words[i].size() * 4 / 2), y - (words.size() - i) * 6, 255, 255 ,255, vertical);
+    }
+
+
+    sleep_ms(ms);
+}
+
 
 #endif

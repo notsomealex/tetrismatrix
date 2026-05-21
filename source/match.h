@@ -3,15 +3,6 @@
 #include "piece.h"
 
 
-enum class GameModes
-{
-    ZEN,
-    MARATHON,
-    VERSUS,
-    COOP,
-    DUAL_BOARD
-};
-
 
 struct MatchSettings
 {
@@ -113,16 +104,21 @@ public:
     MatchSettings settings;
     GameModes game_mode = GameModes::ZEN;
 
+
+    // here each piece represents a player. could be better but meh.
     std::unordered_map<Piece*, int> scores;
-    std::unordered_map<Board*, int> total_lines_cleared;
-    std::unordered_map<Board*, int> current_velocity_lines_cleared;
+    std::unordered_map<Piece*, int> total_lines_cleared;
+    std::unordered_map<Piece*, int> current_velocity_lines_cleared;
 
-    std::unordered_map<Board*, int> singles_amount;
-    std::unordered_map<Board*, int> doubles_amount;
-    std::unordered_map<Board*, int> triples_amount;
-    std::unordered_map<Board*, int> tetris_amount;
+    std::unordered_map<Piece*, int> singles_amount;
+    std::unordered_map<Piece*, int> doubles_amount;
+    std::unordered_map<Piece*, int> triples_amount;
+    std::unordered_map<Piece*, int> tetris_amount;
+    std::unordered_map<Piece*, bool> won;
+    
+    std::unordered_map<Piece*, OptionValue> names;
 
-    OptionValue name = ""; // PLACEHOLDER later actually save this name to the db.
+    OptionValue current_player_name = "";
 
     
     std::string date;
@@ -142,6 +138,7 @@ public:
     void gameWin();
     void versusOver(Piece* winner);
     void showResults(Piece* player_piece);
+    void uploadResults(Piece* player_piece);
     Match();
     Match(MatchSettings settings, GameModes game_mode);
     ~Match();

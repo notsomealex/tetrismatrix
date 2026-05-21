@@ -6,7 +6,7 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set(CMAKE_CXX_STANDARD 20) 
 
 # lik all source files.
-add_executable(tetrismatrix main.cpp board.cpp game.cpp match.cpp piece.cpp menu.cpp my_platform.c inputmanager.cpp networkmanager.cpp)
+add_executable(tetrismatrix main.cpp board.cpp game.cpp match.cpp piece.cpp menu.cpp my_platform.c inputmanager.cpp networkmanager.cpp databasemanager.cpp)
 
 
 target_include_directories(tetrismatrix PRIVATE
@@ -37,6 +37,9 @@ target_link_libraries(tetrismatrix
         #filesystem_vfs
         pico_lwip
         pico_lwip_nosys
+        pico_lwip_http
+        pico_lwip_core
+        pico_lwip_core4
 )
 
 

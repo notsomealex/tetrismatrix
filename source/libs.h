@@ -33,6 +33,10 @@
 #include <variant>
 #include <memory>
 #include <cctype>
+#include "lwip/apps/http_client.h"
+#include "lwip/tcp.h"
+#include "lwip/ip_addr.h"
+
 using namespace pimoroni;
 
 #endif

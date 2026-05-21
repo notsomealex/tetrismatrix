@@ -22,6 +22,16 @@ enum class Menus
     CONNECT_TO_NETWORK
 };
 
+
+enum class GameModes
+{
+    ZEN,
+    MARATHON,
+    VERSUS,
+    COOP,
+    DUAL_BOARD
+};
+
 enum PIECES
 {
     NONE,

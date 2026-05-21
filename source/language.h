@@ -69,7 +69,14 @@ enum class Texts
     UNKNOWN,
     ERROR,
     CONNECTING,
-    NETWORK
+    NETWORK,
+    UPLOADING,
+    UPLOADED,
+    FIRST,
+    GO,
+    TO,
+    UPLOAD,
+    GETTING
 };
 using enum Texts;
 
@@ -138,7 +145,14 @@ inline Translations translations = {
             {UNKNOWN, "UNKNOWN"},
             {ERROR, "ERROR"},
             {CONNECTING, "CONNECTING"},
-            {NETWORK, "NETWORK"}
+            {NETWORK, "NETWORK"},
+            {UPLOADING, "UPLOADING"},
+            {UPLOADED, "UPLOADED"},
+            {FIRST, "FIRST"},
+            {GO, "GO"},
+            {TO, "TO"},
+            {UPLOAD, "UPLOAD"},
+            {GETTING, "GETTING"}
         }
     },
     {
@@ -202,7 +216,14 @@ inline Translations translations = {
             {UNKNOWN, "DESCONOCIDO"},
             {ERROR, "ERROR"},
             {CONNECTING, "CONNECTANDO"},
-            {NETWORK, "RED"}
+            {NETWORK, "RED"},
+            {UPLOADING, "SUBIENDO"},
+            {UPLOADED, "SUBIDA"},
+            {FIRST, "PRIMERO"},
+            {GO, "IR"},
+            {TO, "A"},
+            {UPLOAD, "SUBIR"},
+            {GETTING, "OBTENIENDO"}
 
             
         }

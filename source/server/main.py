@@ -56,6 +56,54 @@ def find_or_create_player(player: Player):
     db.commit()
     return {"id": cursor.lastrowid, "name": player.name}
 
+@app.get("/players/all_stats")
+def get_all_players_stats():
+    db = get_db()
+    cursor = db.cursor(dictionary=True)
+    cursor.execute("""
+        SELECT 
+            p.id,
+            p.name,
+            COUNT(mp.match_id)        as matches_played,
+            COALESCE(SUM(mp.score), 0)         as total_score,
+            COALESCE(SUM(mp.lines_cleared), 0) as total_lines_cleared,
+            COALESCE(SUM(mp.singles), 0)       as total_singles,
+            COALESCE(SUM(mp.doubles), 0)       as total_doubles,
+            COALESCE(SUM(mp.triples), 0)       as total_triples,
+            COALESCE(SUM(mp.tetris), 0)        as total_tetris,
+            COALESCE(SUM(mp.won), 0)           as matches_won
+        FROM player p
+        LEFT JOIN match_player mp ON p.id = mp.player_id
+        GROUP BY p.id, p.name
+        ORDER BY total_score DESC
+    """)
+    return cursor.fetchall()
+
+@app.get("/players/stats")
+def get_player_stats(id: int):
+    db = get_db()
+    cursor = db.cursor(dictionary=True)
+    cursor.execute("""
+        SELECT 
+            p.id,
+            p.name,
+            COUNT(mp.match_id)        as matches_played,
+            COALESCE(SUM(mp.score), 0)         as total_score,
+            COALESCE(SUM(mp.lines_cleared), 0) as total_lines_cleared,
+            COALESCE(SUM(mp.singles), 0)       as total_singles,
+            COALESCE(SUM(mp.doubles), 0)       as total_doubles,
+allCOALESCE(SUM(mp.triples), 0)       as total_triples,
+            COALESCE(SUM(mp.tetris), 0)        as total_tetris,
+            COALESCE(SUM(mp.won), 0)           as matches_won
+        FROM player p
+        WHERE p.id = %s
+        LEFT JOIN match_player mp ON p.id = mp.player_id
+        GROUP BY p.id, p.name
+        ORDER BY total_score DESC LIMIT %s
+    """, (id,))
+    return cursor.fetchall()
+
+
 @app.get("/scores")
 def get_all_scores():
     db = get_db()
@@ -63,6 +111,17 @@ def get_all_scores():
     cursor.execute("SELECT * FROM match_player ORDER BY score DESC")
     return cursor.fetchall()
 
+@app.get("/scores/detailed/{amount}")
+def get_top_detailed_scores(amount: int):
+    db = get_db()
+    cursor = db.cursor(dictionary=True)
+    cursor.execute("""
+        SELECT mp.*, p.name as player_name 
+        FROM match_player mp
+        JOIN player p ON mp.player_id = p.id
+        ORDER BY mp.score DESC LIMIT %s 
+    """, (amount,))
+    return cursor.fetchall()
 @app.post("/match")
 def insert_match(match: Match):
     db = get_db()
@@ -97,6 +156,8 @@ def get_match(id: int):
     cursor.execute("SELECT * FROM `match` WHERE id = %s", (id,))
     result = cursor.fetchone()
     return result or None
+
+
 
 @app.get("/score_entries/{id}")
 def get_score_entry(id: int):
