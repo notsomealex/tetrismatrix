@@ -28,7 +28,10 @@ bool NetworkManager::enable()
 
 
 
-    printf("couldn't connect to network!!\n\n"); 
+    if(result != 0)
+        printf("couldn't connect to network!!\n\n");
+    else
+        printf("connected to network!!\n\n");
 
     return result == 0;
 }
@@ -72,7 +75,6 @@ int NetworkManager::connectToNetwork(const std::string& ssid, const std::string&
             printf("timeout reached!!\n\n");
         else
             printf("unknown cause of error!!\n\n");
-        return result;
     }
 
 
@@ -269,7 +271,6 @@ static err_t http_connected(void* arg, struct tcp_pcb* pcb, err_t err)
     HttpContext* ctx = (HttpContext*)arg;
 
     // send the HTTP request
-    // TCP_WRITE_FLAG_COPY means lwIP makes its own copy, safe to use stack memory
     err_t r = tcp_write(pcb, ctx->request.c_str(), ctx->request.size(), TCP_WRITE_FLAG_COPY);
     if(r != ERR_OK) {
         ctx->error = true;
@@ -292,7 +293,6 @@ static void http_err(void* arg, err_t err)
 
 std::string NetworkManager::httpPost(const char* server_ip, uint16_t port, const char* path, const char* body)
 {
-    // build the full HTTP POST request string
     HttpContext ctx;
     ctx.request = "POST ";
     ctx.request += path;

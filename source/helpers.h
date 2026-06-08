@@ -336,10 +336,15 @@ inline void showMessage(Hub75& hub75, const std::string& text, int ms, bool vert
     int x = tetrismatrix::vertical ? SCREEN_HEIGHT / 2 : SCREEN_WIDTH / 2;
     int y = tetrismatrix::vertical ? SCREEN_WIDTH / 2 : SCREEN_HEIGHT / 2;
 
+   int total_height = (words.size() - 1) * 6; // space between first and last word
+    int start_y = y - total_height / 2;
+
     for(int i = 0; i < words.size(); i++)
     {
         cropTextToFit(words[i], 4, limit);
-        draw4x3Text(tetrismatrix::hub75, tetrismatrix::graphics, words[i], x - (words[i].size() * 4 / 2), y - (words.size() - i) * 6, 255, 255 ,255, vertical);
+        int word_x = x - (words[i].size() * 4 / 2);
+        int word_y = start_y + (i * 6);
+        draw4x3Text(tetrismatrix::hub75, tetrismatrix::graphics, words[i], word_x, word_y, 255, 255, 255, vertical);
     }
 
 

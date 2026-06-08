@@ -22,7 +22,7 @@ Language tetrismatrix::past_language;
 
 void tetrismatrix::initGame()
 {
-    EnumOption default_language = {(int)Language::ES, {"ENGLISH", "ESPANOL"}};
+    EnumOption default_language = {(int)Language::EN, {"ENGLISH", "ESPANOL"}};
     settings.current_language = default_language;
     past_language = (Language)std::get<EnumOption>(settings.current_language).value;
     stdio_init_all();
@@ -132,6 +132,53 @@ Menu *tetrismatrix::createMenu(Menus menu_type)
                             []()
                             {menus.push(createMenu(Menus::SCORES)); InputManager::clearAllInputs(); },
                             true),
+
+                    Menu::Option(
+                            translate(current_language, Texts::ABOUT),
+                            [current_language]()
+                            {
+                                std::string message1, message2, message3 = "";
+                                switch(current_language)
+                                {
+                                    case Language::ES:
+                                        message1 = 
+                                        "'TETRISMATRIX' 2026 "
+                                        "GITHUB.COM/ NOTSOMEALEX  "
+                                        "PROYECTO‎FAN. ";
+                                        message2 =
+                                        "NO‎RELACIONADO‎A "
+                                        "NI‎RESPALDADO "
+                                        "POR " 
+                                        "THE‎TETRIS "
+                                        "COMPANY";
+                                        message3 =
+                                        "GRACIAS POR JUGAR :D";
+                                        break;
+                                    case Language::EN:
+                                        message1 = 
+                                        "'TETRISMATRIX' 2026 "
+                                        "GITHUB.COM/ "
+                                        "NOTSOMEALEX "
+                                        "FAN‎PROJECT";
+                                        message2 =
+                                        "NOT‎RELATED‎TO "
+                                        "NOR‎ENDORSED "
+                                        "BY‎THE " 
+                                        "TETRIS COMPANY";
+                                        message3 =
+                                        "THANKS FOR PLAYING :D";
+                                        break;
+                                }
+                                vertical = false;
+                                showMessage(hub75, message1, 2000, vertical);
+                                showMessage(hub75, message2, 3000, vertical);
+                                showMessage(hub75, message3, 1500, vertical);
+
+                                vertical = true;
+                                InputManager::clearAllInputs(); 
+                            },
+                            true),
+                            
                 }};
 
             title = vertical ? "TETRIS MATRIX" : "TETRISMATRIX";
@@ -140,6 +187,7 @@ Menu *tetrismatrix::createMenu(Menus menu_type)
 
             options = {
                 {
+                /*
                     Menu::Option(
                             translate(current_language, Texts::VOLUME_SFX),
                             []()
@@ -157,7 +205,7 @@ Menu *tetrismatrix::createMenu(Menus menu_type)
                             0,
                             100,
                             true),
-
+                        */
                     Menu::Option(
                             translate(current_language, Texts::LANGUAGE),
                             []()
@@ -179,6 +227,7 @@ Menu *tetrismatrix::createMenu(Menus menu_type)
                             },
                             true),
 
+                            /*
                     Menu::Option(
                             translate(current_language, Texts::SAVE),
                             [current_language]()
@@ -186,7 +235,7 @@ Menu *tetrismatrix::createMenu(Menus menu_type)
                             hub75.clear();
                             std::string saved_text = translate(current_language, Texts::SAVED) + "!";
                             draw4x3Text(hub75, graphics, saved_text, 1, 10, 255, 255, 255, tetrismatrix::vertical);
-                            /*
+                            
                                hub75.stop(dma_complete);
                                DatabaseManager::saveOrUpdateGameSettings(
                                std::get<int>(settings.volume_music),
@@ -195,11 +244,12 @@ Menu *tetrismatrix::createMenu(Menus menu_type)
                                );
                                sqlite3_exec(DatabaseManager::database, "PRAGMA wal_checkpoint(FULL);", nullptr, nullptr, nullptr);
                                hub75.start(dma_complete);
-                               */
+                               
                             sleep_ms(1000);
                             InputManager::clearAllInputs();
                             },
                             true),
+                        */
                 }};
             title = translate(current_language, Texts::OPTIONS);
             break;
@@ -503,9 +553,6 @@ Menu *tetrismatrix::createMenu(Menus menu_type)
                                     trimTrailingSpaces(std::get<std::string>(*password));
  
                                     NetworkManager::enable();
-                                    // FOR TESTING. REMOVE
-                                    if(network.ssid == "Totalplay-21AA")
-                                    *password = "21AA1A802RdsAgMZ";
 
                                     int result = NetworkManager::connectToNetwork(network.ssid, std::get<std::string>(*password));
                                     NetworkManager::disable();
@@ -539,8 +586,7 @@ Menu *tetrismatrix::createMenu(Menus menu_type)
             };
             break;
         case Menus::OPTIONS:
-            menu->options[2].on_click = []()
-            { past_language = (Language)std::get<EnumOption>(settings.current_language).value; };
+
             break;
         case Menus::SCORES:
         /*

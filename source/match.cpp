@@ -260,8 +260,11 @@ void Match::updateMatch()
         while (InputManager::controllers.size() != 2)
             InputManager::searchForControllers();
 
-        showUpcomingPieces(pieces[0], 0, pieces[0]->board->board_pos_y - 10, true, false);
-        showUpcomingPieces(pieces[1], SCREEN_WIDTH, pieces[1]->board->board_pos_y - 10, true, false);
+        showUpcomingPieces(pieces[0], pieces[0]->board->board_pos_x - 4, pieces[0]->board->board_pos_y + 2, true, false);
+        showHoldPiece(pieces[0], pieces[0]->board->board_pos_x - 4, pieces[0]->board->board_pos_y + 2 + (pieces[0]->upcoming_pieces.size() + 3) * 5, true, false);
+
+        showUpcomingPieces(pieces[1], pieces[1]->board->board_pos_x + (pieces[1]->board->board_width) + 1, pieces[1]->board->board_pos_y + 2, true, false);
+        showHoldPiece(pieces[1], (pieces[1]->board->board_pos_x + pieces[1]->board->board_width + 1) * pieces[1]->scale, pieces[1]->board->board_pos_y + 2 + ((pieces[1]->upcoming_pieces.size() + 3) * 5), true, false);
 
         if (pieces[0]->checkCollision() & COLLISION_DIRECTION::UP || pieces[1]->checkCollision() & COLLISION_DIRECTION::UP)
         {
@@ -389,7 +392,7 @@ void Match::showHoldPiece(Piece *piece, int pos_x, int pos_y, bool vertical_layo
         clearRegionOfScreen(tetrismatrix::hub75,
                             pos_x,
                             piece_pos_y - 1,
-                            pos_x + (4 * piece->scale) - 1,
+                            pos_x + (4 * piece->scale) - 2,
                             piece_pos_y + (4 * piece->scale),
                             tetrismatrix::vertical);
     else
@@ -520,6 +523,7 @@ void Match::gameOver()
             self->names[self->pieces[0]] = std::get<std::string>(*name_copy);
             trimTrailingSpaces(self->names[self->pieces[0]]);
             self->showResults(self->pieces[0]);
+            self->uploadResults(self->pieces[0]);
             InputManager::clearAllInputs();
         };
         break;
@@ -540,14 +544,41 @@ void Match::gameOver()
         tetrismatrix::vertical = true;
         tetrismatrix::menus.push(new Menu(options, pieces[1]->controller));
         tetrismatrix::menus.top()->executeSelectedOption();
-        tetrismatrix::menus.top()->on_close = [this, name]()
-        { auto self = this; auto name_copy = name; tetrismatrix::menus.push(createMenu(Menus::GAME_OVER)); self->showResults(self->pieces[1]); names[pieces[1]] = std::get<std::string>(*name_copy); self->uploadResults(self->pieces[1]);InputManager::clearAllInputs(); };
+        tetrismatrix::menus.top()->on_close = 
+        [this, name]()
+        { 
+            auto self = this; 
+            auto name_copy = name; 
+
+            tetrismatrix::popMenu();
+            tetrismatrix::popMenu();
+            tetrismatrix::popMenu();
+
+            tetrismatrix::menus.push(createMenu(Menus::GAME_OVER)); 
+            self->names[self->pieces[1]] = std::get<std::string>(*name_copy); 
+            self->uploadResults(self->pieces[1]);
+            self->showResults(self->pieces[1]); 
+            InputManager::clearAllInputs(); 
+        };
 
         options[0].name = translate(current_language, Texts::PLAYER) + "1: " + translate(current_language, Texts::ENTER_YOUR_NAME);
         tetrismatrix::menus.push(new Menu(options, pieces[0]->controller));
         tetrismatrix::menus.top()->executeSelectedOption();
-        tetrismatrix::menus.top()->on_close = [this, name]()
-        { auto self = this; auto name_copy = name; tetrismatrix::popMenu(); tetrismatrix::popMenu(); self->showResults(self->pieces[0]); names[pieces[0]] = std::get<std::string>(*name_copy); uploadResults(self->pieces[0]); InputManager::clearAllInputs(); };
+        tetrismatrix::menus.top()->on_close = 
+        [this, name]()
+        { 
+            auto self = this; 
+            auto name_copy = *name;
+            *name = "          ";
+            tetrismatrix::popMenu();
+            tetrismatrix::popMenu();
+
+ 
+            self->names[self->pieces[0]] = std::get<std::string>(name_copy); 
+            self->uploadResults(self->pieces[0]); 
+            self->showResults(self->pieces[0]);
+            InputManager::clearAllInputs(); 
+        };
 
         break;
     }
@@ -613,7 +644,6 @@ void Match::showResults(Piece *player_piece)
         auto self = this;
         auto p_piece = player_piece;
         tetrismatrix::popMenu();
-        self->uploadResults(p_piece);
     };
 }
 
@@ -624,12 +654,13 @@ void Match::uploadResults(Piece *player_piece)
 
     std::vector<Menu::Option> options =
         {
-            Menu::Option(translate(current_language, Texts::UPLOAD) + " " + translate(current_language, Texts::RESULTS) + "???", []() {}, upload.get(), 0, 1, false)};
+            Menu::Option(translate(current_language, Texts::UPLOAD) + " " + translate(current_language, Texts::RESULTS) + "???", []() {}, upload.get(), 0, 1, false)
+        };
 
-    tetrismatrix::menus.push(new Menu(options));
+    tetrismatrix::menus.push(new Menu(options, player_piece->controller));
     menus.top()->executeSelectedOption();
     menus.top()->on_close =
-        [current_language, this, player_piece, upload]()
+    [current_language, this, player_piece, upload]()
     {
         if (!std::get<bool>(*upload))
         {

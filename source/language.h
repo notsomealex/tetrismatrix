@@ -76,7 +76,8 @@ enum class Texts
     GO,
     TO,
     UPLOAD,
-    GETTING
+    GETTING,
+    ABOUT
 };
 using enum Texts;
 
@@ -152,7 +153,8 @@ inline Translations translations = {
             {GO, "GO"},
             {TO, "TO"},
             {UPLOAD, "UPLOAD"},
-            {GETTING, "GETTING"}
+            {GETTING, "GETTING"},
+            {ABOUT, "ABOUT"}
         }
     },
     {
@@ -223,7 +225,8 @@ inline Translations translations = {
             {GO, "IR"},
             {TO, "A"},
             {UPLOAD, "SUBIR"},
-            {GETTING, "OBTENIENDO"}
+            {GETTING, "OBTENIENDO"},
+            {ABOUT, "ACERCA DE"}
 
             
         }
