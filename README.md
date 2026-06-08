@@ -12,13 +12,13 @@ the panel I've tested this on is [this Waveshare one](https://docs.waveshare.com
 in the model of panel mentioned before, the pin layout is the next one:
 
 <p align="center">
-<img src="hub75_layout.webp" width="600">
+<img src="images/hub75_layout.webp" width="600">
 </p>
 
 and it should be connected like this to the Pico:
 
 <p align="center">
-<img src="pico_layout.webp" width="300">
+<img src="images/pico_layout.webp" width="300">
 </p>
 you'd also need to supply power to the panel itself, which in the Waveshare panel it's 5V.
 
