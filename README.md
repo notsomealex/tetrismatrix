@@ -48,14 +48,21 @@ you can:
 
 ## Pictures
 
-<img src="0.jpeg" width="400">
-<img src="1.jpeg" width="400">
-<img src="2.jpeg" width="400">
-<img src="3.jpeg" width="400">
+<img src="images/0.jpeg" width="400">
+<img src="images/1.jpeg" width="400">
+<img src="images/2.jpeg" width="400">
+<img src="images/3.jpeg" width="400">
 
 ## Credits
 
-[the Pico SDK](https://github.com/raspberrypi/pico-sdk).
-[the Pimoroni libraries for the Raspberry Pi Pico](https://github.com/pimoroni/pimoroni-pico).
-[Bluepad32](https://github.com/ricardoquesada/bluepad32).
+[the Pico SDK](https://github.com/raspberrypi/pico-sdk)
+
+[the Pimoroni libraries for the Raspberry Pi Pico](https://github.com/pimoroni/pimoroni-pico)
+
+[Bluepad32](https://github.com/ricardoquesada/bluepad32)
+
+## Disclaimer
+
+**this is a fan game and is NOT related to nor endorsed by The Tetris Company in any way.**
+
 
