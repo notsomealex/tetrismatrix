@@ -1,9 +1,7 @@
 # tetrismatrix
 
 a Tetris game for the Raspberry Pi Pico WH, displayed on a HUB75 64x32 LED matrix.
-<p align="center">
 <img src="images/0.gif" width="300">
-</p>
 
 ## Running
 to run this, you'll (obviously) need a Raspberry Pi Pico WH and a HUB75 64x32 LED matrix panel, and any controller supported by the [Bluepad32 library](https://github.com/ricardoquesada/bluepad32).
