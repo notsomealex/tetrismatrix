@@ -1,6 +1,7 @@
 # tetrismatrix
 
 a Tetris game for the Raspberry Pi Pico WH, displayed on a HUB75 64x32 LED matrix.
+
 <img src="images/0.gif" width="300">
 
 ## Running
