@@ -58,9 +58,11 @@ you can:
 ## Videos
 
 showcase of Zen and Marathon game modes, along with other stuff as Internet connection and switching languages.
+
 https://github.com/user-attachments/assets/0fe4d79b-f7a7-4f18-8356-1db6566a62bd
 
 showcase of Versus mode. (thanks 2 frens :D).
+
 https://github.com/user-attachments/assets/52ca82fe-8ffa-4487-88af-447d653262ce
 
 ## Considerations
